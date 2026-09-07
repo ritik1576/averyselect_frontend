@@ -528,13 +528,21 @@ try {
          cleanStdout = parts[1].trim();
       }
 
-      const expectedClean = tc.expectedOutput.trim();
+      const normalizeOutput = (s: string) =>
+        s.trim().split('\n').map(l => l.trim()).filter(l => l !== '').join('\n');
+
+      const expectedClean = normalizeOutput(tc.expectedOutput);
+      const actualClean = normalizeOutput(cleanStdout);
+
       let expectedObj, actualObj;
       try { expectedObj = JSON.parse(expectedClean); } catch(e) { expectedObj = expectedClean; }
-      try { actualObj = JSON.parse(cleanStdout); } catch(e) { actualObj = cleanStdout; }
+      try { actualObj = JSON.parse(actualClean); } catch(e) { actualObj = actualClean; }
       
       const isMatch = JSON.stringify(expectedObj) === JSON.stringify(actualObj);
-      const isPassed = result.exitCode === 0 && !result.stderr && isMatch;
+      // For C++/Java: stderr may contain JVM/compiler warnings even on success.
+      // Only consider it a hard failure if exitCode != 0 (compile/runtime error).
+      const hasHardError = result.exitCode !== 0;
+      const isPassed = !hasHardError && isMatch;
       
       const finalOutput = consoleLogs ? `Logs:\n${consoleLogs}\n\nResult:\n${cleanStdout}` : cleanStdout;
 
@@ -543,7 +551,7 @@ try {
         label: tc.label || `Case ${publicTestCases.indexOf(tc) + 1}`,
         input: tc.input,
         expectedOutput: tc.expectedOutput,
-        actualOutput: result.stderr ? `Error: ${result.stderr.trim()}` : (finalOutput || '(No output returned)'),
+        actualOutput: hasHardError ? `Error: ${result.stderr.trim()}` : (finalOutput || '(No output returned)'),
         passed: isPassed,
         isHidden: false,
         timeMs: result.executionTimeMs,
