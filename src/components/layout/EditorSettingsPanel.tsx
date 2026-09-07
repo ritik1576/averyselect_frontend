@@ -3,7 +3,6 @@ import { Controller } from 'react-hook-form';
 import type { UseFormRegister, FieldErrors, Control } from 'react-hook-form';
 import { Card } from '../ui/Card';
 import { Heading, Text } from '../ui/Typography';
-import { Input } from '../ui/Input';
 import { DifficultySelector } from '../DifficultySelector/DifficultySelector';
 
 interface EditorSettingsPanelProps {
@@ -27,7 +26,6 @@ export const EditorSettingsPanel: React.FC<EditorSettingsPanelProps> = ({ regist
             <DifficultySelector
               value={field.value}
               onChange={field.onChange}
-              error={errors.difficulty?.message as string}
             />
           )}
         />

@@ -9,9 +9,10 @@ export interface ModalProps {
   title: string;
   children: React.ReactNode;
   footer?: React.ReactNode;
+  size?: 'sm' | 'md' | 'lg' | string;
 }
 
-export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, footer }) => {
+export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, footer, size }) => {
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -27,7 +28,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
 
   return (
     <div className="ui-modal-overlay" onClick={onClose}>
-      <div className="ui-modal-container" onClick={(e) => e.stopPropagation()}>
+      <div className={`ui-modal-container ${size ? `ui-modal-container--${size}` : ''}`} onClick={(e) => e.stopPropagation()}>
         <header className="ui-modal-header">
           <Heading level={3} variant="titleMd">{title}</Heading>
           <button className="ui-modal-close" onClick={onClose}>

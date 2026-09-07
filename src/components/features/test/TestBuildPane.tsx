@@ -41,7 +41,7 @@ const SortableQuestionCard: React.FC<{ question: AssessmentQuestion }> = ({ ques
       <div className="question-build-content">
         <div className="card-tags">
           <span className="tag-blue">{TYPE_LABEL[question.question_type]}</span>
-          {'⭐'.repeat(question.difficulty)}
+          {'⭐'.repeat(question.difficulty || 1)}
         </div>
         <div className="tbp-card-title">{question.title}</div>
         <div className="card-meta mt-2">

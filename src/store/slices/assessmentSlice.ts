@@ -78,7 +78,7 @@ const assessmentSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
-    fetchBankQuestionsRequest(state, _action: PayloadAction<{ search?: string; type?: string; page?: number; limit?: number } | void>) {
+    fetchBankQuestionsRequest(state, _action: PayloadAction<{ search?: string; type?: string; page?: number; limit?: number } | undefined>) {
       state.loading = true;
       state.error = null;
     },

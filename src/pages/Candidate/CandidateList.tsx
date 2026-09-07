@@ -322,7 +322,15 @@ export const CandidateList: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {paginated.length === 0 ? (
+            {loading ? (
+              <tr className="cl-empty-row">
+                <td colSpan={4}>
+                  <div className="cl-empty-state">
+                    <div className="cl-empty-title">Loading candidates...</div>
+                  </div>
+                </td>
+              </tr>
+            ) : paginated.length === 0 ? (
               <tr className="cl-empty-row">
                 <td colSpan={4}>
                   <div className="cl-empty-state">

@@ -3,7 +3,6 @@ import { PencilLoader } from './PencilLoader';
 import './GlobalLoader.css';
 
 export const GlobalLoader: React.FC<{ fullScreen?: boolean; text?: string }> = ({ 
-  fullScreen = false,
   text
 }) => {
   return (

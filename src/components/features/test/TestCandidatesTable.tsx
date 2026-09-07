@@ -3,7 +3,6 @@ import { Search, SlidersHorizontal, Info, User, ChevronDown, Check, X, Download 
 import { Pagination, TableSkeleton } from '../../ui';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { sessionService } from '../../../services/api/session.service';
-import { Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -193,7 +192,6 @@ export const TestCandidatesTable: React.FC = () => {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [counts, setCounts] = useState<TabCounts>({ all: 0, to_review: 0, passed: 0, rejected: 0 });
   const [totalPages, setTotalPages] = useState(1);
-  const [loading, setLoading] = useState(true);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -220,7 +218,6 @@ export const TestCandidatesTable: React.FC = () => {
   // ── Fetch (single source of truth) ──────────────────────────────────────────
   const fetchCandidates = useCallback(async () => {
     if (!assessmentId) return;
-    setLoading(true);
     setError(null);
     try {
       const res = await sessionService.getAll({
@@ -249,19 +246,19 @@ export const TestCandidatesTable: React.FC = () => {
       if (res.meta) {
         setTotalPages(res.meta.totalPages || 1);
         // counts come back from the backend always based on the full assessmentId scope (not the filtered tab)
-        if (res.meta.counts) {
+        const metaCounts = (res.meta as any)?.counts;
+        if (metaCounts) {
           setCounts({
-            all:       res.meta.counts.all       || 0,
-            to_review: res.meta.counts.to_review || 0,
-            passed:    res.meta.counts.passed    || 0,
-            rejected:  res.meta.counts.rejected  || 0,
+            all:       metaCounts.all       || 0,
+            to_review: metaCounts.to_review || 0,
+            passed:    metaCounts.passed    || 0,
+            rejected:  metaCounts.rejected  || 0,
           });
         }
       }
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to fetch candidates');
     } finally {
-      setLoading(false);
       setIsInitialLoading(false);
     }
   }, [assessmentId, activeTab, debouncedSearch, currentPage]);
