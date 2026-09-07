@@ -113,17 +113,27 @@ export const CodingEditor: React.FC = () => {
   }, [id, dispatch]);
 
   React.useEffect(() => {
-    if (id && currentQuestion && currentQuestion.id === id) {
+    if (id && currentQuestion && String(currentQuestion.id) === String(id)) {
       reset({
-        ...currentQuestion,
-        language: currentQuestion.language as any,
-        test_cases: currentQuestion.test_cases?.length
-          ? currentQuestion.test_cases
-          : [{ id: 'tc-1', title: 'Test 1', input: '', expected_output: '', is_hidden: false }],
+        title: (currentQuestion as any).title ?? '',
+        description: (currentQuestion as any).description ?? (currentQuestion as any).text ?? '',
+        difficulty: (currentQuestion as any).difficulty ?? 3,
+        points: (currentQuestion as any).points ?? 50,
         estimated_time: currentQuestion.estimated_time_seconds
           ? new Date(currentQuestion.estimated_time_seconds * 1000).toISOString().substring(11, 16)
-          : '00:15'
-      } as any);
+          : '00:15',
+        language: ((currentQuestion as any).language as SupportedLanguage) ?? 'javascript',
+        starter_code: (currentQuestion as any).starter_code ?? '',
+        test_cases: (currentQuestion as any).test_cases?.length
+          ? (currentQuestion as any).test_cases.map((tc: any, idx: number) => ({
+              id: tc.id ?? `tc-${idx}`,
+              title: tc.title ?? `Test Case ${idx + 1}`,
+              input: tc.input ?? '',
+              expected_output: tc.expected_output ?? tc.expectedOutput ?? '',
+              is_hidden: tc.is_hidden ?? tc.isHidden ?? false,
+            }))
+          : [{ id: 'tc-1', title: 'Test Case 1', input: '', expected_output: '', is_hidden: false }],
+      });
     }
   }, [id, currentQuestion, reset]);
 
