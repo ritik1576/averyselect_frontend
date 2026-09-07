@@ -58,14 +58,16 @@ export const TestSettings: React.FC<TestSettingsProps> = ({ assessment: currentA
 
   const handleSave = () => {
     if (!currentAssessment) return;
+    const payload = {
+      title,
+      durationMinutes: durationMinutes === '' ? 45 : durationMinutes,
+      passingPercentage: passingPercentage === '' ? 60 : passingPercentage,
+      securitySetting: security as any
+    };
+    console.log("Saving Assessment Payload:", JSON.stringify(payload, null, 2));
     dispatch(updateAssessmentRequest({
       id: currentAssessment.id,
-      data: {
-        title,
-        durationMinutes: durationMinutes === '' ? 45 : durationMinutes,
-        passingPercentage: passingPercentage === '' ? 60 : passingPercentage,
-        securitySetting: security as any
-      } as any
+      data: payload as any
     }));
   };
 
