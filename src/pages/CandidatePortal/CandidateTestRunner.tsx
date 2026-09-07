@@ -453,7 +453,7 @@ try:
   if fn and callable(fn):
       args = (${tc.input},)
       result = fn(*args)
-      print("\\n---AGY_RESULT_DELIM---\\n" + (json.dumps(result) if isinstance(result, (dict, list, tuple)) else str(result).lower() if isinstance(result, bool) else str(result)), end='')
+      print("\\n---AGY_RESULT_DELIM---\\n" + json.dumps(result), end='')
   else:
       pass
 except Exception as e:
@@ -474,7 +474,7 @@ try {
     let args = [ ${tc.input} ];
     const result = __fn(...args);
     if (result !== undefined) {
-      process.stdout.write("\\n---AGY_RESULT_DELIM---\\n" + (typeof result === 'object' ? JSON.stringify(result) : String(result)));
+      process.stdout.write("\\n---AGY_RESULT_DELIM---\\n" + JSON.stringify(result));
     }
   } else {
     // If no function, assume they are just printing or we gracefully ignore
@@ -503,7 +503,11 @@ try {
       }
 
       const expectedClean = tc.expectedOutput.trim();
-      const isMatch = cleanStdout === expectedClean || cleanStdout.includes(expectedClean);
+      let expectedObj, actualObj;
+      try { expectedObj = JSON.parse(expectedClean); } catch(e) { expectedObj = expectedClean; }
+      try { actualObj = JSON.parse(cleanStdout); } catch(e) { actualObj = cleanStdout; }
+      
+      const isMatch = JSON.stringify(expectedObj) === JSON.stringify(actualObj);
       const isPassed = result.exitCode === 0 && !result.stderr && isMatch;
       
       const finalOutput = consoleLogs ? `Logs:\n${consoleLogs}\n\nResult:\n${cleanStdout}` : cleanStdout;
