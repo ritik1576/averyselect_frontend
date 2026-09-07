@@ -1,0 +1,50 @@
+.ui-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: var(--stack-md) 0;
+}
+
+.ui-page-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-background);
+  font-size: var(--text-13);
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.ui-page-btn:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.ui-page-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ui-page-btn--active {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-white);
+}
+
+.ui-page-btn--active:hover:not(:disabled) {
+  color: var(--color-white);
+}
+
+.ui-page-ellipsis {
+  font-size: var(--text-sm);
+  color: var(--color-neutral);
+  padding: 0 4px;
+}

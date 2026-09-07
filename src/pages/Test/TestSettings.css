@@ -1,0 +1,372 @@
+.ts-container {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  flex: 1;
+  background-color: transparent;
+}
+
+.ts-sub-tabs {
+  display: flex;
+  justify-content: center;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 32px;
+}
+
+.ts-sub-tab {
+  padding: 0 0 12px 0;
+  font-size: var(--text-11);
+  font-weight: 800;
+  color: var(--color-text);
+  letter-spacing: 0.05em;
+  position: relative;
+}
+
+.ts-sub-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--color-primary);
+}
+
+.ts-content-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 120px;
+}
+
+/* Scrollbar styling */
+.ts-content-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.ts-content-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.ts-content-scroll::-webkit-scrollbar-thumb {
+  background-color: var(--color-neutral-300);
+  border-radius: var(--radius-10);
+}
+
+.ts-section {
+  max-width: 760px;
+  margin: 0 auto 48px auto;
+}
+
+.ts-section-title {
+  font-size: var(--text-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+  margin-bottom: 24px;
+}
+
+/* Forms */
+.ts-form-group {
+  margin-bottom: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ts-form-group label {
+  font-size: var(--text-13);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+}
+
+.ts-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--radius-2xl);
+  background-color: var(--color-background);
+  font-size: var(--text-13);
+  color: var(--color-text);
+  outline: none;
+  transition: border-color 0.2s;
+  font-family: var(--font-body);
+}
+
+.ts-input:focus {
+  border-color: var(--color-primary);
+}
+
+.ts-input-small {
+  width: 180px;
+}
+
+/* Radios */
+.ts-radio-group {
+  display: flex;
+  gap: 32px;
+  margin-top: 4px;
+}
+
+.ts-radio {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: var(--text-13);
+  color: var(--color-neutral);
+  font-weight: var(--font-weight-medium);
+}
+
+.ts-radio.active {
+  color: var(--color-text);
+}
+
+.ts-radio input {
+  display: none;
+}
+
+.ts-radio-custom {
+  width: 16px;
+  height: 16px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-neutral-300);
+  background-color: var(--color-background);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ts-radio.active .ts-radio-custom {
+  border-color: var(--color-primary);
+}
+
+.ts-radio.active .ts-radio-custom::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  background-color: var(--color-primary);
+  border-radius: var(--radius-full);
+}
+
+/* Timer Cards */
+.ts-timer-cards {
+  display: flex;
+  gap: 24px;
+  margin-top: 8px;
+}
+
+.ts-timer-card {
+  flex: 1;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--radius-3xl);
+  padding: 32px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+}
+
+.ts-timer-card.active {
+  border-color: var(--color-primary);
+  box-shadow: 0 4px 20px rgba(249, 115, 22, 0.05); /* subtle orange shadow */
+}
+
+.ts-timer-card-title {
+  font-size: var(--text-11);
+  font-weight: 800;
+  text-align: center;
+  letter-spacing: 0.05em;
+  margin-bottom: 24px;
+}
+
+.ts-timer-card-desc {
+  font-size: var(--text-xs);
+  color: var(--color-neutral);
+  text-align: center;
+  line-height: 1.6;
+  flex: 1;
+}
+
+.ts-timer-card-desc p {
+  margin-bottom: 16px;
+}
+
+.ts-timer-card:not(.active) .ts-timer-card-title {
+  color: var(--color-neutral-400);
+}
+
+.ts-timer-card:not(.active) .ts-timer-card-desc p {
+  color: var(--color-neutral-300);
+}
+
+/* When only Global Timer is shown (MVP — single card), constrain width */
+.ts-timer-card--full {
+  max-width: 400px;
+  margin: 0 auto;
+  cursor: default;
+}
+
+.ts-timer-input-group {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ts-timer-input-group label {
+  font-size: var(--text-11);
+  text-align: center;
+}
+
+.ts-checkbox-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+  font-size: var(--text-xs);
+  color: var(--color-neutral);
+  cursor: pointer;
+}
+
+.ts-custom-checkbox {
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--radius-full);
+  background-color: var(--color-background);
+}
+
+/* Info Banner */
+.ts-info-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  background-color: var(--color-info-light);
+  border: 1px solid var(--color-info-light);
+  padding: 16px 20px;
+  border-radius: var(--radius-xl);
+  margin-bottom: 32px;
+}
+
+.ts-banner-icon {
+  color: var(--color-info);
+  margin-top: 2px;
+}
+
+.ts-banner-content {
+  flex: 1;
+}
+
+.ts-banner-content h4 {
+  margin: 0 0 4px 0;
+  font-size: var(--text-13);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+}
+
+.ts-banner-content p {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--color-neutral);
+  line-height: 1.5;
+}
+
+.ts-banner-content a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.ts-banner-close {
+  background: none;
+  border: none;
+  color: var(--color-neutral-400);
+  cursor: pointer;
+}
+
+/* Toggles */
+.ts-toggles-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.ts-toggle-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.ts-toggle-switch {
+  width: 36px;
+  height: 20px;
+  background-color: var(--color-neutral-200);
+  border-radius: var(--radius-lg);
+  position: relative;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.ts-toggle-switch.active {
+  background-color: var(--color-primary);
+}
+
+.ts-toggle-knob {
+  width: 16px;
+  height: 16px;
+  background-color: var(--color-background);
+  border-radius: var(--radius-full);
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.ts-toggle-switch.active .ts-toggle-knob {
+  transform: translateX(16px);
+}
+
+.ts-toggle-info h4 {
+  margin: 0 0 4px 0;
+  font-size: var(--text-13);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+.ts-toggle-info p {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--color-neutral);
+  line-height: 1.5;
+}
+
+.ts-toggle-info a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+/* Sticky Footer */
+.ts-sticky-footer {
+  padding: 20px 0 32px 0;
+  background-color: var(--color-background);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  border-top: 1px solid var(--color-border);
+  margin-top: auto;
+}
+
+/* Utilities */
+.ts-pb-100 {
+  padding-bottom: 100px;
+}
+
+.ts-danger-text {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-neutral-800);
+}

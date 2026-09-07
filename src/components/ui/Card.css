@@ -1,0 +1,22 @@
+.ui-card {
+  background-color: var(--color-background);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  box-shadow: none; /* Emphasizing flatness from the design system */
+}
+
+.ui-card--p-none {
+  padding: 0;
+}
+
+.ui-card--p-sm {
+  padding: var(--stack-sm);
+}
+
+.ui-card--p-md {
+  padding: var(--stack-md);
+}
+
+.ui-card--p-lg {
+  padding: var(--stack-lg);
+}

@@ -1,0 +1,75 @@
+.cs-container {
+  min-height: 100vh;
+  background-color: var(--color-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  font-family: var(--font-body, system-ui, sans-serif);
+}
+
+.cs-card {
+  background-color: var(--color-white);
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--radius-3xl);
+  max-width: 520px;
+  width: 100%;
+  padding: 48px 40px;
+  text-align: center;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+}
+
+.cs-icon-wrapper {
+  margin-bottom: 20px;
+  display: inline-flex;
+  padding: 16px;
+  background-color: var(--color-warning-light);
+  border-radius: var(--radius-full);
+}
+
+.cs-title {
+  font-family: 'Libre Caslon Text', Georgia, serif;
+  font-size: var(--text-4xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-neutral-900);
+  margin: 0 0 12px 0;
+}
+
+.cs-subtitle {
+  font-size: var(--text-15);
+  color: var(--color-neutral-600);
+  line-height: 1.6;
+  margin: 0 0 32px 0;
+}
+
+.cs-info-box {
+  background-color: var(--color-neutral-50);
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--radius-xl);
+  padding: 20px;
+  text-align: left;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 32px;
+}
+
+.cs-info-box strong {
+  display: block;
+  font-size: var(--text-sm);
+  color: var(--color-neutral-800);
+  margin-bottom: 4px;
+}
+
+.cs-info-box p {
+  font-size: var(--text-13);
+  color: var(--color-neutral-500);
+  margin: 0;
+  line-height: 1.45;
+}
+
+.cs-footer-text {
+  font-size: var(--text-13);
+  color: var(--color-neutral-400);
+  font-weight: var(--font-weight-medium);
+}

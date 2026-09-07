@@ -1,0 +1,56 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { sessionService } from './session.service';
+import { apiClient } from './client';
+
+// Mock the apiClient completely
+vi.mock('./client', () => ({
+  apiClient: {
+    get: vi.fn(),
+    post: vi.fn(),
+  },
+}));
+
+describe('sessionService', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  describe('getAll', () => {
+    it('should fetch all candidate sessions', async () => {
+      const mockResponse = { data: { data: [{ session_id: '1', candidate_name: 'John Doe' }] } };
+      (apiClient.get as any).mockResolvedValue(mockResponse);
+
+      const result = await sessionService.getAll();
+
+      expect(apiClient.get).toHaveBeenCalledWith('/sessions');
+      expect(result).toEqual(mockResponse.data);
+    });
+  });
+
+  describe('getReport', () => {
+    it('should fetch detailed report for a session', async () => {
+      const mockResponse = { data: { data: [{ id: 'q1', score: 10 }] } };
+      (apiClient.get as any).mockResolvedValue(mockResponse);
+
+      const result = await sessionService.getReport('session_123');
+
+      expect(apiClient.get).toHaveBeenCalledWith('/sessions/session_123/report');
+      expect(result).toEqual(mockResponse.data);
+    });
+  });
+
+  });
+
+  describe('submitTest', () => {
+    it('should submit test answers', async () => {
+      const mockResponse = { data: { success: true } };
+      (apiClient.post as any).mockResolvedValue(mockResponse);
+
+      const answers = { q1: 'answer1' };
+      const result = await sessionService.submitTest('token_abc', answers);
+
+      expect(apiClient.post).toHaveBeenCalledWith('/take/token_abc/submit', { answers });
+      expect(result).toEqual(mockResponse.data);
+    });
+  });
+});

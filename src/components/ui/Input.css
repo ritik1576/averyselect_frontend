@@ -1,0 +1,68 @@
+.ui-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.ui-input {
+  width: 100%;
+  height: 40px;
+  padding: 0 16px;
+  font-family: var(--font-body);
+  font-size: var(--text-body-md);
+  color: var(--color-secondary);
+  background-color: var(--color-background);
+  border: 1px solid var(--color-neutral);
+  border-radius: var(--radius-sm);
+  outline: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.ui-input::placeholder {
+  color: var(--color-neutral);
+}
+
+.ui-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 1px var(--color-primary);
+}
+
+.ui-input:disabled {
+  background-color: var(--color-tertiary);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.ui-input--error {
+  border-color: var(--color-error);
+}
+
+.ui-input--error:focus {
+  box-shadow: 0 0 0 1px var(--color-error);
+}
+
+.ui-input--search {
+  border-radius: var(--radius-pill);
+  background-color: var(--color-tertiary);
+  border-color: transparent;
+}
+
+.ui-input--search:focus {
+  border-color: var(--color-neutral);
+  box-shadow: none;
+}
+
+.ui-input--with-icon {
+  padding-left: 40px;
+}
+
+.ui-input__icon {
+  position: absolute;
+  left: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-secondary);
+  pointer-events: none;
+}

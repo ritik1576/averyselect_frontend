@@ -1,0 +1,42 @@
+.ql-metric-card {
+  flex: 1;
+  background-color: var(--color-white);
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--radius-40);
+  padding: 24px 32px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+}
+
+.ql-metric-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.ql-metric-label {
+  font-size: var(--text-10);
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: var(--color-neutral);
+}
+
+.ql-metric-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bg-orange-light { background-color: var(--color-warning-light); }
+.bg-blue-light { background-color: var(--color-info-light); }
+.bg-gray-light { background-color: var(--color-neutral-100); }
+
+.ql-metric-value {
+  font-size: var(--text-40);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+  font-family: var(--font-display);
+}

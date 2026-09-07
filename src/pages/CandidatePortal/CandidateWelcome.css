@@ -1,0 +1,225 @@
+.cw-page-container {
+  min-height: 100vh;
+  background-color: var(--color-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  font-family: var(--font-body, system-ui, sans-serif);
+}
+
+.cw-card {
+  background-color: var(--color-white);
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--radius-3xl);
+  max-width: 640px;
+  width: 100%;
+  padding: 40px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+}
+
+.cw-header {
+  margin-bottom: 24px;
+}
+
+.cw-badge-brand {
+  display: inline-block;
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+
+.cw-title {
+  font-family: 'Libre Caslon Text', Georgia, serif;
+  font-size: var(--text-28);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-neutral-900);
+  margin: 0 0 8px 0;
+  line-height: 1.25;
+}
+
+.cw-subtitle {
+  font-size: var(--text-sm);
+  color: var(--color-neutral-500);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.cw-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.cw-meta-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--color-neutral-100);
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  font-size: var(--text-13);
+  color: var(--color-neutral-700);
+}
+
+.cw-rules-box {
+  background-color: var(--color-warning-light);
+  border: 1px solid var(--color-warning-light);
+  border-radius: var(--radius-xl);
+  padding: 20px;
+  margin-bottom: 28px;
+}
+
+.cw-rules-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.cw-rules-header h3 {
+  font-size: var(--text-15);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-warning-dark);
+  margin: 0;
+}
+
+.cw-rules-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 520px) {
+  .cw-rules-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.cw-rule-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.cw-rule-icon {
+  color: var(--color-primary-hover);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.cw-rule-item strong {
+  display: block;
+  font-size: var(--text-13);
+  color: var(--color-warning-dark);
+  margin-bottom: 2px;
+}
+
+.cw-rule-item p {
+  font-size: var(--text-xs);
+  color: var(--color-warning-dark);
+  margin: 0;
+  line-height: 1.35;
+}
+
+.cw-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.cw-error-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--color-error-light);
+  border: 1px solid var(--color-error-light);
+  color: var(--color-error);
+  padding: 10px 14px;
+  border-radius: var(--radius-10);
+  font-size: var(--text-13);
+}
+
+.cw-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.cw-field-row {
+  display: flex;
+  gap: 16px;
+}
+
+@media (max-width: 520px) {
+  .cw-field-row {
+    flex-direction: column;
+  }
+}
+
+.cw-field label {
+  font-size: var(--text-13);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-neutral-700);
+}
+
+.cw-field input {
+  padding: 10px 14px;
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--radius-10);
+  font-size: var(--text-sm);
+  outline: none;
+  transition: all 0.2s;
+}
+
+.cw-field input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(239, 70, 35, 0.15);
+}
+
+.cw-checkbox-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.cw-checkbox-row input {
+  margin-top: 3px;
+  accent-color: var(--color-primary);
+}
+
+.cw-checkbox-row label {
+  font-size: var(--text-xs);
+  color: var(--color-neutral-500);
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.cw-start-btn {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  border: none;
+  padding: 14px 24px;
+  border-radius: var(--radius-pill);
+  font-size: var(--text-base);
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(239, 70, 35, 0.25);
+}
+
+.cw-start-btn:hover {
+  background-color: var(--color-primary-hover);
+  transform: translateY(-1px);
+}

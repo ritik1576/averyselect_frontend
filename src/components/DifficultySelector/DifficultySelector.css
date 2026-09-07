@@ -1,0 +1,44 @@
+.difficulty-selector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--color-neutral-50);
+  padding: 8px 12px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-neutral-200);
+  width: fit-content;
+}
+
+.diff-stars-container {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.diff-star-btn {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  transition: all 0.2s ease;
+}
+
+.diff-star-btn:hover {
+  background: var(--color-neutral-100);
+  transform: scale(1.1);
+}
+
+.diff-star-btn:active {
+  transform: scale(0.95);
+}
+
+.diff-label {
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-neutral-700);
+  min-width: 80px;
+}
