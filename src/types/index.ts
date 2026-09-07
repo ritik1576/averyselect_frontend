@@ -147,15 +147,15 @@ export interface AssessmentLink {
 
 export interface AssessmentSecuritySettings {
   id: string;
-  assessment_id: string;
-  fullscreen_required: boolean;
-  tab_switch_detection: boolean;
-  window_focus_detection: boolean;
-  copy_paste_blocking: boolean;
-  large_paste_detection: boolean;
-  unusual_activity_alerts: boolean;
-  created_at: string;
-  updated_at: string;
+  assessmentId: string;
+  fullscreenRequired: boolean;
+  tabSwitchDetection: boolean;
+  windowFocusDetection: boolean;
+  copyPasteBlocking: boolean;
+  largePasteDetection: boolean;
+  unusualActivityAlerts: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // ─── Candidates ───────────────────────────────────────────────

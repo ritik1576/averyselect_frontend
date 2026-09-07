@@ -5,10 +5,14 @@ import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { updateAssessmentRequest } from '../../store/slices/assessmentSlice';
 import './TestSettings.css';
 
-// MVP-scoped security settings state (6 fields only)
-interface SecurityState extends Omit<AssessmentSecuritySettings,
-  'id' | 'assessment_id' | 'created_at' | 'updated_at'
-> {}
+interface SecurityState {
+  fullscreenRequired: boolean;
+  tabSwitchDetection: boolean;
+  windowFocusDetection: boolean;
+  copyPasteBlocking: boolean;
+  largePasteDetection: boolean;
+  unusualActivityAlerts: boolean;
+}
 
 import type { Assessment } from '../../types';
 
@@ -26,13 +30,13 @@ export const TestSettings: React.FC<TestSettingsProps> = ({ assessment: currentA
   const [passingPercentage, setPassingPercentage] = useState<number | ''>(60);
 
   const [security, setSecurity] = useState<SecurityState>({
-    fullscreen_required: true,
-    tab_switch_detection: true,
-    window_focus_detection: false,
-    copy_paste_blocking: true,
-    large_paste_detection: false,
-    unusual_activity_alerts: true,
-  } as any);
+    fullscreenRequired: true,
+    tabSwitchDetection: true,
+    windowFocusDetection: false,
+    copyPasteBlocking: true,
+    largePasteDetection: false,
+    unusualActivityAlerts: true,
+  });
 
   useEffect(() => {
     if (currentAssessment) {
@@ -42,13 +46,13 @@ export const TestSettings: React.FC<TestSettingsProps> = ({ assessment: currentA
       
       if ((currentAssessment as any).securitySetting) {
         setSecurity({
-            fullscreen_required: (currentAssessment as any).securitySetting.fullscreen_required ?? true,
-            tab_switch_detection: (currentAssessment as any).securitySetting.tab_switch_detection ?? true,
-            window_focus_detection: (currentAssessment as any).securitySetting.window_focus_detection ?? false,
-            copy_paste_blocking: (currentAssessment as any).securitySetting.copy_paste_blocking ?? true,
-            large_paste_detection: (currentAssessment as any).securitySetting.large_paste_detection ?? false,
-            unusual_activity_alerts: (currentAssessment as any).securitySetting.unusual_activity_alerts ?? true,
-        } as any);
+            fullscreenRequired: (currentAssessment as any).securitySetting.fullscreenRequired ?? true,
+            tabSwitchDetection: (currentAssessment as any).securitySetting.tabSwitchDetection ?? true,
+            windowFocusDetection: (currentAssessment as any).securitySetting.windowFocusDetection ?? false,
+            copyPasteBlocking: (currentAssessment as any).securitySetting.copyPasteBlocking ?? true,
+            largePasteDetection: (currentAssessment as any).securitySetting.largePasteDetection ?? false,
+            unusualActivityAlerts: (currentAssessment as any).securitySetting.unusualActivityAlerts ?? true,
+        });
       }
     }
   }, [currentAssessment]);
@@ -136,11 +140,11 @@ export const TestSettings: React.FC<TestSettingsProps> = ({ assessment: currentA
             {/* unusual_activity_alerts */}
             <div className="ts-toggle-row">
               <div
-                className={`ts-toggle-switch ${security.unusual_activity_alerts ? 'active' : ''}`}
-                onClick={() => toggleSecurity('unusual_activity_alerts')}
+                className={`ts-toggle-switch ${security.unusualActivityAlerts ? 'active' : ''}`}
+                onClick={() => toggleSecurity('unusualActivityAlerts')}
               >
                 <div className="ts-toggle-knob">
-                  {security.unusual_activity_alerts && <Check size={10} color="#fff" strokeWidth={4} />}
+                  {security.unusualActivityAlerts && <Check size={10} color="#fff" strokeWidth={4} />}
                 </div>
               </div>
               <div className="ts-toggle-info">
@@ -155,11 +159,11 @@ export const TestSettings: React.FC<TestSettingsProps> = ({ assessment: currentA
             {/* copy_paste_blocking */}
             <div className="ts-toggle-row">
               <div
-                className={`ts-toggle-switch ${security.copy_paste_blocking ? 'active' : ''}`}
-                onClick={() => toggleSecurity('copy_paste_blocking')}
+                className={`ts-toggle-switch ${security.copyPasteBlocking ? 'active' : ''}`}
+                onClick={() => toggleSecurity('copyPasteBlocking')}
               >
                 <div className="ts-toggle-knob">
-                  {security.copy_paste_blocking && <Check size={10} color="#fff" strokeWidth={4} />}
+                  {security.copyPasteBlocking && <Check size={10} color="#fff" strokeWidth={4} />}
                 </div>
               </div>
               <div className="ts-toggle-info">
@@ -171,11 +175,11 @@ export const TestSettings: React.FC<TestSettingsProps> = ({ assessment: currentA
             {/* large_paste_detection */}
             <div className="ts-toggle-row">
               <div
-                className={`ts-toggle-switch ${security.large_paste_detection ? 'active' : ''}`}
-                onClick={() => toggleSecurity('large_paste_detection')}
+                className={`ts-toggle-switch ${security.largePasteDetection ? 'active' : ''}`}
+                onClick={() => toggleSecurity('largePasteDetection')}
               >
                 <div className="ts-toggle-knob">
-                  {security.large_paste_detection && <Check size={10} color="#fff" strokeWidth={4} />}
+                  {security.largePasteDetection && <Check size={10} color="#fff" strokeWidth={4} />}
                 </div>
               </div>
               <div className="ts-toggle-info">
@@ -190,11 +194,11 @@ export const TestSettings: React.FC<TestSettingsProps> = ({ assessment: currentA
             {/* tab_switch_detection */}
             <div className="ts-toggle-row">
               <div
-                className={`ts-toggle-switch ${security.tab_switch_detection ? 'active' : ''}`}
-                onClick={() => toggleSecurity('tab_switch_detection')}
+                className={`ts-toggle-switch ${security.tabSwitchDetection ? 'active' : ''}`}
+                onClick={() => toggleSecurity('tabSwitchDetection')}
               >
                 <div className="ts-toggle-knob">
-                  {security.tab_switch_detection && <Check size={10} color="#fff" strokeWidth={4} />}
+                  {security.tabSwitchDetection && <Check size={10} color="#fff" strokeWidth={4} />}
                 </div>
               </div>
               <div className="ts-toggle-info">
@@ -209,11 +213,11 @@ export const TestSettings: React.FC<TestSettingsProps> = ({ assessment: currentA
             {/* window_focus_detection */}
             <div className="ts-toggle-row">
               <div
-                className={`ts-toggle-switch ${security.window_focus_detection ? 'active' : ''}`}
-                onClick={() => toggleSecurity('window_focus_detection')}
+                className={`ts-toggle-switch ${security.windowFocusDetection ? 'active' : ''}`}
+                onClick={() => toggleSecurity('windowFocusDetection')}
               >
                 <div className="ts-toggle-knob">
-                  {security.window_focus_detection && <Check size={10} color="#fff" strokeWidth={4} />}
+                  {security.windowFocusDetection && <Check size={10} color="#fff" strokeWidth={4} />}
                 </div>
               </div>
               <div className="ts-toggle-info">
@@ -228,11 +232,11 @@ export const TestSettings: React.FC<TestSettingsProps> = ({ assessment: currentA
             {/* fullscreen_required */}
             <div className="ts-toggle-row">
               <div
-                className={`ts-toggle-switch ${security.fullscreen_required ? 'active' : ''}`}
-                onClick={() => toggleSecurity('fullscreen_required')}
+                className={`ts-toggle-switch ${security.fullscreenRequired ? 'active' : ''}`}
+                onClick={() => toggleSecurity('fullscreenRequired')}
               >
                 <div className="ts-toggle-knob">
-                  {security.fullscreen_required && <Check size={10} color="#fff" strokeWidth={4} />}
+                  {security.fullscreenRequired && <Check size={10} color="#fff" strokeWidth={4} />}
                 </div>
               </div>
               <div className="ts-toggle-info">
