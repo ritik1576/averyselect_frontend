@@ -35,15 +35,15 @@ export async function executeCode(
   
   while (retries > 0) {
     try {
-      const response = await fetch('https://ce.judge0.com/submissions?wait=true', {
+      const response = await fetch('https://ce.judge0.com/submissions?base64_encoded=true&wait=true', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          source_code: code,
+          source_code: btoa(unescape(encodeURIComponent(code))),
           language_id: langConfig.id,
-          stdin: stdin,
+          stdin: btoa(unescape(encodeURIComponent(stdin))),
         }),
       });
 
@@ -73,9 +73,11 @@ export async function executeCode(
 
       const data = await response.json();
       
-      const stdout = data.stdout || '';
-      const compileOutput = data.compile_output || '';
-      const stderr = data.stderr || compileOutput || data.message || '';
+      const decode = (str: string | null) => str ? decodeURIComponent(escape(atob(str))) : '';
+      
+      const stdout = decode(data.stdout);
+      const compileOutput = decode(data.compile_output);
+      const stderr = decode(data.stderr) || compileOutput || data.message || '';
       const exitCode = data.status?.id === 3 ? 0 : (data.status?.id || 1);
       
       const output = stdout ? (stderr ? `${stdout}\n\nErrors:\n${stderr}` : stdout) : stderr;
