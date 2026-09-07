@@ -65,12 +65,23 @@ interface CodePlaybackProps {
 }
 
 const CodePlaybackPlayer: React.FC<CodePlaybackProps> = ({ answer, questionId }) => {
-  const keystrokes = answer.keystrokes;
+  const keystrokes = useMemo(() => {
+    const ks = [...answer.keystrokes];
+    if (ks.length === 0 || ks[ks.length - 1].code !== answer.finalCode) {
+       ks.push({
+         code: answer.finalCode || '',
+         timestamp: (ks.length > 0 ? ks[ks.length - 1].timestamp : 0) + 1000
+       });
+    }
+    return ks;
+  }, [answer.keystrokes, answer.finalCode]);
+
   const total = keystrokes.length - 1;
 
   const containerRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const isDraggingRef = useRef(false);
+  const initializedRef = useRef(false);
 
   // All mutable playback state lives in refs to avoid stale closures
   const timeRef = useRef(0);
@@ -106,7 +117,15 @@ const CodePlaybackPlayer: React.FC<CodePlaybackProps> = ({ answer, questionId })
 
   const totalPlaybackTime = timeline[total] || 0;
   const totalPlaybackTimeRef = useRef(totalPlaybackTime);
-  useEffect(() => { totalPlaybackTimeRef.current = totalPlaybackTime; }, [totalPlaybackTime]);
+  
+  useEffect(() => { 
+    totalPlaybackTimeRef.current = totalPlaybackTime; 
+    if (!initializedRef.current && totalPlaybackTime > 0) {
+      initializedRef.current = true;
+      setRenderTime(totalPlaybackTime);
+      timeRef.current = totalPlaybackTime;
+    }
+  }, [totalPlaybackTime]);
 
   // Binary search: find current keystroke index from time
   const getIndexAtTime = (t: number) => {
