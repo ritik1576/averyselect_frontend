@@ -20,12 +20,12 @@ export const StarRating: React.FC<StarRatingProps> = ({
 }) => {
   return (
     <div className={`star-rating-container ${className || ''}`}>
-      {Array.from({ length: count }, (_, i) => i + 1).map((star) => (
+      {Array.from({ length: maxStars }, (_, i) => i + 1).map((star) => (
         <Star 
           key={star} 
           size={size} 
-          fill={activeColor} 
-          stroke={activeColor} 
+          fill={star <= count ? activeColor : 'none'} 
+          stroke={star <= count ? activeColor : inactiveColor} 
         />
       ))}
     </div>

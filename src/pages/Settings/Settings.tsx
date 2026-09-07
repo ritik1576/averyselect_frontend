@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import toast from 'react-hot-toast';
 import './Settings.css';
-import { User, Mail, Building2, Shield, CreditCard } from 'lucide-react';
+import { Mail, Building2, Shield, CreditCard } from 'lucide-react';
 import { updateUser } from '../../store/slices/authSlice';
 import { userService } from '../../services/api/user.service';
 

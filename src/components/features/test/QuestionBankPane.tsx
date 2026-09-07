@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
-import { Info, X, ChevronDown, SlidersHorizontal, List, Search, Code, AlignLeft, Plus } from 'lucide-react';
+import { Info, X, List, Search, Code, AlignLeft, Plus } from 'lucide-react';
 import { useAppSelector, useAppDispatch } from '../../../store/hooks';
 import { fetchBankQuestionsRequest, addQuestionToTest } from '../../../store/slices/assessmentSlice';
-import type { Question } from '../../../types';
+import type { Question } from '../../../types/models';
 
 const TYPE_ICON: Record<string, React.ReactNode> = {
   mcq: <List size={14} />,
@@ -48,7 +48,7 @@ const DraggableQuestionCard: React.FC<{ question: Question }> = ({ question }) =
       </div>
       <div className="bank-card-right">
         <span className="meta-item">{TYPE_ICON[question.question_type]}</span>
-        <span className="pts">{'⭐'.repeat(question.difficulty)}</span>
+        <span className="pts">{'⭐'.repeat(question.difficulty || 1)}</span>
         <span className="time">{Math.ceil((question.estimated_time_seconds || 300) / 60)}m</span>
         <button
           className="bank-add-btn"

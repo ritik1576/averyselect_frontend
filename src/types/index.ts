@@ -262,7 +262,7 @@ export interface ActivityEvent {
 }
 
 export interface SessionReport {
-  questions: QuestionResult[];
+  questions: any[];
   activityEvents: ActivityEvent[];
   assessment_title?: string;
   candidate_name?: string;
@@ -300,4 +300,5 @@ export interface CandidateSessionListItem {
   percentage: number;
   status: SessionStatus;
   isPassed?: boolean | null;
+  passingPercentage?: number;
 }

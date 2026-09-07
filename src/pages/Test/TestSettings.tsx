@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Clock, Plus, Trash2, Check } from 'lucide-react';
+import { Check } from 'lucide-react';
 import type { AssessmentSecuritySettings } from '../../types';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { updateAssessmentRequest } from '../../store/slices/assessmentSlice';
@@ -13,7 +13,7 @@ interface SecurityState extends Omit<AssessmentSecuritySettings,
 import type { Assessment } from '../../types';
 
 interface TestSettingsProps {
-  assessment: Assessment;
+  assessment?: Assessment;
 }
 
 export const TestSettings: React.FC<TestSettingsProps> = ({ assessment: currentAssessment }) => {

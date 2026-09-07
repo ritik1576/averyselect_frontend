@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
@@ -8,7 +8,7 @@ import {
   X, User, Mail,
   XCircle, CheckCircle2, Copy,
   Play, Pause, Maximize2, Minimize2, RotateCcw,
-  AlertTriangle, Edit2, Check, X as XIcon, ShieldAlert, MonitorOff, CopyX, MousePointerClick
+  AlertTriangle, Edit2, Check, X as XIcon, ShieldAlert, MonitorOff, CopyX
 } from 'lucide-react';
 import './CandidateDetailReport.css';
 import { sessionService } from '../../services/api/session.service';
@@ -54,7 +54,7 @@ interface QuestionResult {
 }
 
 
-import type { ActivityEvent, SessionReport } from '../../types';
+import type { ActivityEvent } from '../../types';
 
 // ─── Code Playback Player Component ──────────────────────────────────────────
 const SPEEDS = [0.5, 1, 1.5, 2, 4, 8];
@@ -69,7 +69,6 @@ const CodePlaybackPlayer: React.FC<CodePlaybackProps> = ({ answer, questionId })
   const total = keystrokes.length - 1;
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const progressBarRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const isDraggingRef = useRef(false);
 
@@ -188,14 +187,6 @@ const CodePlaybackPlayer: React.FC<CodePlaybackProps> = ({ answer, questionId })
     stopInterval();
     timeRef.current = 0;
     setRenderTime(0);
-  };
-
-  const seekToRatio = (ratio: number, element: HTMLElement) => {
-    const rect = element.getBoundingClientRect();
-    const r = Math.max(0, Math.min(1, ratio));
-    const newTime = r * totalPlaybackTime;
-    timeRef.current = newTime;
-    setRenderTime(newTime);
   };
 
   const getRatioFromX = (clientX: number, element: HTMLElement) => {
@@ -626,7 +617,7 @@ export const CandidateDetailReport: React.FC = () => {
                   ) : (
                     <span className="cdr-q-pts">
                       ({q.score} / {q.maxScore} pts)
-                      {q.attempted && sessionData?.status === 'COMPLETED' && (
+                      {q.attempted && (sessionData?.status === 'completed' || (sessionData?.status as string)?.toUpperCase() === 'COMPLETED') && (
                         <button className="edit-score-btn" onClick={(e) => { e.stopPropagation(); handleEditScoreStart(q); }} title="Override Score">
                           <Edit2 size={14} />
                         </button>

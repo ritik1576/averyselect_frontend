@@ -14,14 +14,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { executeCode } from '../../services/codeExecution';
 import './CandidateTestRunner.css';
 
-interface TestCase {
-  id: number;
-  label: string;
-  input: string;
-  expectedOutput: string;
-  isHidden?: boolean;
-}
-
 interface TestCaseResult {
   testCaseId: number;
   label: string;
@@ -31,19 +23,6 @@ interface TestCaseResult {
   passed: boolean;
   isHidden?: boolean;
   timeMs?: number;
-}
-
-interface Question {
-  id: string;
-  type: 'mcq' | 'code' | 'free_text';
-  title: string;
-  domain: string;
-  points: number;
-  description: string;
-  options?: { id: string; label: string; text: string }[];
-  starterCode?: string;
-  language?: string;
-  testCases?: TestCase[];
 }
 
 interface TerminalResult {

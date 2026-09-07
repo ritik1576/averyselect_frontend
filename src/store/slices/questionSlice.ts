@@ -22,7 +22,7 @@ const questionSlice = createSlice({
   name: 'question',
   initialState,
   reducers: {
-    fetchQuestionsRequest(state, _action: PayloadAction<{ page?: number; limit?: number; search?: string }>) {
+    fetchQuestionsRequest(state, _action: PayloadAction<{ page?: number; limit?: number; search?: string; type?: string; difficulty?: string | number; domain?: string; domain_id?: string }>) {
       state.loading = true;
       state.error = null;
     },
