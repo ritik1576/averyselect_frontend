@@ -3,6 +3,11 @@ import type { ApiResponse } from '../../types/api';
 import type { Question } from '../../types';
 
 export const candidateService = {
+  getAssessmentInfo: async (token: string) => {
+    const response = await publicApiClient.get(`/public/assessments/${token}`);
+    return response.data;
+  },
+
   // Start the assessment and get the session JWT
   startAssessment: async (
     token: string, 

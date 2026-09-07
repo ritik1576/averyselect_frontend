@@ -47,7 +47,7 @@ const SortableQuestionCard: React.FC<{ question: AssessmentQuestion }> = ({ ques
         <div className="card-meta mt-2">
           <span className="meta-item">{TYPE_ICON[question.question_type]} {question.points} pts</span>
           <span className="meta-item">
-            <Clock size={13} /> {Math.ceil((question.estimated_time_seconds || 300) / 60)} min
+            <Clock size={13} /> {Math.ceil((question.estimated_time_seconds || (question as any).estimatedTimeSeconds || 300) / 60)} min
           </span>
         </div>
       </div>

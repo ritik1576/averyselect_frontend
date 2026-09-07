@@ -641,6 +641,8 @@
   font-family: monospace;
   font-size: var(--text-13);
   line-height: 1.5;
+  max-height: 400px;
+  overflow-y: auto;
 }
 
 .tr-output-code {

@@ -143,6 +143,8 @@ export const CandidateTestRunner: React.FC = () => {
   const currentQ: any = testQuestions[currentIdx];
   const currentLangKey = selectedLanguages[currentQ?.id] || 'javascript';
   const currentLangConfig = LANGUAGE_TEMPLATES[currentLangKey] || LANGUAGE_TEMPLATES.javascript;
+  const currentQLang = currentQ?.languages?.find((l: any) => l.languageName.toLowerCase() === currentLangKey.toLowerCase());
+  const defaultStarterCode = currentQLang?.starterCode ?? currentLangConfig.starter;
 
   // Fullscreen Request Handler (Triggers on User Gesture)
   const handleEnterFullscreen = () => {
@@ -159,8 +161,10 @@ export const CandidateTestRunner: React.FC = () => {
 
   // Initialize Webcam Stream with Error/Denial Catching
   useEffect(() => {
+    let streamToStop: MediaStream | null = null;
     navigator.mediaDevices?.getUserMedia({ video: true, audio: false })
       .then((s) => {
+        streamToStop = s;
         setMediaStream(s);
         setCameraStatus('active');
 
@@ -181,9 +185,9 @@ export const CandidateTestRunner: React.FC = () => {
       });
 
     return () => {
-      mediaStream?.getTracks().forEach((t) => t.stop());
+      streamToStop?.getTracks().forEach((t) => t.stop());
     };
-  }, [mediaStream]);
+  }, []);
 
   // Attach Stream to Video element when ref and stream are ready
   useEffect(() => {
@@ -385,12 +389,13 @@ export const CandidateTestRunner: React.FC = () => {
   const handleLanguageChange = (langKey: string) => {
     setSelectedLanguages((prev) => ({ ...prev, [currentQ.id]: langKey }));
     // Reset code answer to starter template for new language if not edited
-    const newTemplate = LANGUAGE_TEMPLATES[langKey]?.starter || '';
+    const qLang = currentQ?.languages?.find((l: any) => l.languageName.toLowerCase() === langKey.toLowerCase());
+    const newTemplate = qLang?.starterCode ?? LANGUAGE_TEMPLATES[langKey]?.starter ?? '';
     setAnswers((prev) => ({ ...prev, [currentQ.id]: newTemplate }));
   };
 
   const handleRunCode = async () => {
-    const code = answers[currentQ.id] ?? currentLangConfig.starter;
+    const code = answers[currentQ.id] ?? defaultStarterCode;
     setIsExecuting(true);
 
     setCodeOutputs((prev) => ({
@@ -446,12 +451,9 @@ try:
   fn_name = '${fnName}'
   fn = locals().get(fn_name)
   if fn and callable(fn):
-      args = ${tc.input}
-      if isinstance(args, list) and not fn_name.startswith('solution'):
-          result = fn(*args)
-      else:
-          result = fn(args)
-      print("\n---AGY_RESULT_DELIM---\n" + (json.dumps(result) if isinstance(result, (dict, list, tuple)) else str(result).lower() if isinstance(result, bool) else str(result)), end='')
+      args = (${tc.input},)
+      result = fn(*args)
+      print("\\n---AGY_RESULT_DELIM---\\n" + (json.dumps(result) if isinstance(result, (dict, list, tuple)) else str(result).lower() if isinstance(result, bool) else str(result)), end='')
   else:
       pass
 except Exception as e:
@@ -469,10 +471,10 @@ try {
   }
   
   if (__fn) {
-    let args = ${tc.input};
-    const result = Array.isArray(args) ? __fn(...args) : __fn(args);
+    let args = [ ${tc.input} ];
+    const result = __fn(...args);
     if (result !== undefined) {
-      process.stdout.write("\n---AGY_RESULT_DELIM---\n" + (typeof result === 'object' ? JSON.stringify(result) : String(result)));
+      process.stdout.write("\\n---AGY_RESULT_DELIM---\\n" + (typeof result === 'object' ? JSON.stringify(result) : String(result)));
     }
   } else {
     // If no function, assume they are just printing or we gracefully ignore
@@ -736,7 +738,7 @@ try {
                     height="340px"
                     language={currentLangConfig.monacoLang}
                     theme="vs-dark"
-                    value={answers[currentQ.id] ?? currentLangConfig.starter}
+                    value={answers[currentQ.id] ?? defaultStarterCode}
                     onChange={handleCodeChange}
                     options={{ fontSize: 14, minimap: { enabled: false } }}
                   />

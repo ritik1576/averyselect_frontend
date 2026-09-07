@@ -101,7 +101,8 @@ const assessmentSlice = createSlice({
         state.selectedQuestions.push({
           ...question,
           display_order: state.selectedQuestions.length,
-          points: 10,
+          points: question.points || 10,
+          estimated_time_seconds: (question as any).estimatedTimeSeconds || question.estimated_time_seconds,
         });
         state.hasUnsavedChanges = true;
       }
@@ -150,7 +151,8 @@ const assessmentSlice = createSlice({
       state.selectedQuestions = action.payload.map((q: any) => ({
         ...q.question,
         display_order: q.orderIdx,
-        points: q.points,
+        points: q.points || q.question?.points || 0,
+        estimated_time_seconds: q.question?.estimatedTimeSeconds || q.question?.estimated_time_seconds,
         // Map backend type MULTIPLE_CHOICE -> mcq, etc.
         type: q.question.type === 'MULTIPLE_CHOICE' ? 'mcq' : q.question.type === 'CODING' ? 'coding' : 'free_text',
         question_type: q.question.type === 'MULTIPLE_CHOICE' ? 'mcq' : q.question.type === 'CODING' ? 'coding' : 'free_text',

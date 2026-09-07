@@ -49,7 +49,7 @@ const DraggableQuestionCard: React.FC<{ question: Question }> = ({ question }) =
       <div className="bank-card-right">
         <span className="meta-item">{TYPE_ICON[question.question_type]}</span>
         <span className="pts">{'⭐'.repeat(question.difficulty || 1)}</span>
-        <span className="time">{Math.ceil((question.estimated_time_seconds || 300) / 60)}m</span>
+        <span className="time">{Math.ceil((question.estimated_time_seconds || (question as any).estimatedTimeSeconds || 300) / 60)}m</span>
         <button
           className="bank-add-btn"
           title="Add to test"
