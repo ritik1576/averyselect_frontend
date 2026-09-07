@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useAppSelector } from '../../store/hooks';
 import { startAssessmentRequest } from '../../store/slices/sessionSlice';
+import { candidateService } from '../../services/api/candidate.service';
 import { Clock, HelpCircle, ShieldAlert, Camera, MonitorX, AlertCircle, ArrowRight } from 'lucide-react';
 import './CandidateWelcome.css';
 
@@ -22,6 +23,23 @@ export const CandidateWelcome: React.FC = () => {
 
   // We can use a local state to see if we just submitted
   const [submitted, setSubmitted] = useState(false);
+  const [assessmentInfo, setAssessmentInfo] = useState<any>(null);
+  const [infoLoading, setInfoLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchInfo = async () => {
+      if (!token) return;
+      try {
+        const res = await candidateService.getAssessmentInfo(token);
+        if (res.success) setAssessmentInfo(res.data);
+      } catch (err: any) {
+        setError(err.response?.data?.message || 'Failed to load assessment details');
+      } finally {
+        setInfoLoading(false);
+      }
+    };
+    fetchInfo();
+  }, [token]);
 
   useEffect(() => {
     // If we submitted and it's no longer loading and there is no error, it was a success!
@@ -61,24 +79,24 @@ export const CandidateWelcome: React.FC = () => {
       <div className="cw-card">
         {/* Header Branding */}
         <div className="cw-header">
-          <div className="cw-badge-brand">AverySelect Assessments</div>
-          <h1 className="cw-title">Frontend Developer Technical Assessment</h1>
-          <p className="cw-subtitle">Please confirm your details and review the proctoring guidelines before starting.</p>
+          <div className="cw-badge-brand">{assessmentInfo?.companyName || 'AverySelect Assessments'}</div>
+          <h1 className="cw-title">{assessmentInfo?.title || 'Frontend Developer Technical Assessment'}</h1>
+          <p className="cw-subtitle">{assessmentInfo?.description || 'Please confirm your details and review the proctoring guidelines before starting.'}</p>
         </div>
 
         {/* Test Overview Chips */}
         <div className="cw-meta-row">
           <div className="cw-meta-chip">
             <Clock size={16} color="#ef4623" />
-            <span>Duration: <strong>60 minutes</strong></span>
+            <span>Duration: <strong>{assessmentInfo?.durationMinutes || 60} minutes</strong></span>
           </div>
           <div className="cw-meta-chip">
             <HelpCircle size={16} color="#ef4623" />
-            <span>Questions: <strong>12 Total</strong></span>
+            <span>Questions: <strong>{assessmentInfo?.questionCount || 12} Total</strong></span>
           </div>
           <div className="cw-meta-chip">
             <ShieldAlert size={16} color="#ef4623" />
-            <span>Proctoring: <strong>Strict Mode</strong></span>
+            <span>Proctoring: <strong>{assessmentInfo?.securitySetting?.proctoringLevel === 'STRICT' ? 'Strict Mode' : 'Standard'}</strong></span>
           </div>
         </div>
 
@@ -114,6 +132,9 @@ export const CandidateWelcome: React.FC = () => {
               <span>{error}</span>
             </div>
           )}
+
+          {!infoLoading && (
+            <>
 
           <div className="cw-field">
             <label htmlFor="cand-name">Full Name *</label>
@@ -158,14 +179,21 @@ export const CandidateWelcome: React.FC = () => {
               checked={agreed}
               onChange={(e) => setAgreed(e.target.checked)}
             />
-            <label htmlFor="agree-check">
-              I certify that I will complete this assessment independently without unauthorized assistance.
+            <label htmlFor="cand-agree">
+              I agree to the <a href="#">Terms & Conditions</a> and consent to the proctoring guidelines.
             </label>
           </div>
 
-          <button type="submit" className="cw-start-btn">
-            Start Assessment <ArrowRight size={18} />
+          <button 
+            type="submit" 
+            className="cw-start-btn" 
+            disabled={loading || !assessmentInfo}
+          >
+            {loading ? 'Preparing Test...' : 'Start Assessment'}
+            {!loading && <ArrowRight size={18} />}
           </button>
+          </>
+          )}
         </form>
       </div>
     </div>

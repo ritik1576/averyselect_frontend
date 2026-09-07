@@ -231,7 +231,7 @@ export const TestDetail: React.FC = () => {
                 <div className="metric-info">
                   <span className="metric-label">EST. TIME</span>
                   <span className="metric-value">
-                    {selectedQuestions.length === 0 ? '—' : `${selectedQuestions.reduce((s, q) => s + Math.ceil((q.estimated_time_seconds || 300) / 60), 0)}m`}
+                    {selectedQuestions.length === 0 ? '—' : `${selectedQuestions.reduce((s, q) => s + Math.ceil((q.estimated_time_seconds || (q as any).estimatedTimeSeconds || 300) / 60), 0)}m`}
                   </span>
                 </div>
               </div>
