@@ -1,0 +1,461 @@
+@import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&display=swap');
+
+:root {
+  /* Brand Colors */
+  --color-primary: #ef4623;
+  --color-primary-hover: #d93d1d;
+  --color-primary-light: rgba(239, 70, 35, 0.08);
+
+  /* Neutrals (Tailwind Scale) */
+  --color-neutral-900: #111827;
+  --color-neutral-800: #1f2937;
+  --color-neutral-700: #374151;
+  --color-neutral-600: #4b5563;
+  --color-neutral-500: #6b7280;
+  --color-neutral-400: #9ca3af;
+  --color-neutral-300: #d1d5db;
+  --color-neutral-200: #e5e7eb;
+  --color-neutral-100: #f3f4f6;
+  --color-neutral-50: #f9fafb;
+  --color-white: #ffffff;
+  --color-black: #000000;
+
+  /* Legacy Neutrals mapped for compatibility */
+  --color-secondary: var(--color-neutral-700);
+  --color-neutral: var(--color-neutral-500);
+  --color-neutral-light: var(--color-neutral-400);
+
+  /* Surfaces */
+  --color-background: var(--color-white);
+  --color-surface: #f7f9ff;
+  --color-surface-hover: var(--color-neutral-50);
+
+  /* Borders */
+  --color-border: var(--color-neutral-200);
+  --color-border-strong: var(--color-neutral-300);
+
+  /* Semantic */
+  --color-error: #ef4444;
+  --color-error-light: #fee2e2;
+  --color-error-dark: #b91c1c;
+
+  --color-success: #10b981;
+  --color-success-light: #d1fae5;
+  --color-success-dark: #065f46;
+
+  --color-warning: #f59e0b;
+  --color-warning-light: #fef3c7;
+  --color-warning-dark: #b45309;
+
+  --color-info: #3b82f6;
+  --color-info-light: #eff6ff;
+  --color-info-dark: #1e40af;
+
+  /* Editor Specific */
+  --color-editor-bg: #1e1e1e;
+  --color-editor-text: #d4d4d4;
+  --color-editor-tab-bg: #252526;
+  --color-editor-tab-text: #e5e5e5;
+  --color-editor-border: #333333;
+
+  --color-icon-js: #f1e05a;
+  --color-icon-py: #3572A5;
+  --color-icon-ts: #3178c6;
+  --color-icon-java: #ed8b00;
+  --color-icon-cpp: #00599c;
+
+  /* Typography */
+  --font-heading: 'Libre Caslon Text', serif;
+  --font-body: 'Hanken Grotesk', sans-serif;
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Typography Sizes */
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-lg: 18px;
+  --text-xl: 20px;
+  --text-2xl: 24px;
+  --text-3xl: 30px;
+  --text-4xl: 36px;
+  --text-5xl: 48px;
+
+  /* Legacy aliases (to avoid breaking things) */
+  --text-page-title: var(--text-5xl);
+  --text-display-lg: 56px;
+  --text-headline-lg: var(--text-4xl);
+  --text-title-md: var(--text-xl);
+  --text-body-lg: var(--text-lg);
+  --text-body-md: var(--text-base);
+  --text-label-sm: var(--text-xs);
+  --text-button: var(--text-sm);
+
+  /* Precise sizes seen in project */
+  --text-9: 9px;
+  --text-10: 10px;
+  --text-11: 11px;
+  --text-13: 13px;
+  --text-15: 15px;
+  --text-22: 22px;
+  --text-26: 26px;
+  --text-28: 28px;
+  --text-40: 40px;
+
+  /* Spacing */
+  --sidebar-width: 260px;
+  --content-max-width: 1200px;
+  --gutter: 24px;
+  --page-padding: 40px;
+  --margin-page: 48px;
+  --stack-xs: 4px;
+  --stack-sm: 8px;
+  --stack-md: 16px;
+  --stack-lg: 32px;
+  --stack-xl: 48px;
+
+  /* Shapes */
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --radius-3xl: 24px;
+  --radius-full: 50%;
+  --radius-pill: 9999px;
+
+  --radius-3: 3px;
+  --radius-6: 6px;
+  --radius-10: 10px;
+  --radius-40: 40px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+[data-theme='dark'] {
+  /* Surfaces */
+  --color-background: #0d1117;
+  --color-surface: #161b22;
+  --color-surface-hover: #21262d;
+
+  /* Neutrals */
+  --color-neutral-900: #f4f6f9;
+  --color-neutral-800: #e2e8f0;
+  --color-neutral-700: #cbd5e1;
+  --color-neutral-600: #94a3b8;
+  --color-neutral-500: #64748b;
+  --color-neutral-400: #475569;
+  --color-neutral-300: #334155;
+  --color-neutral-200: rgba(255, 255, 255, 0.1);
+  --color-neutral-100: rgba(255, 255, 255, 0.05);
+  --color-neutral-50: rgba(255, 255, 255, 0.02);
+
+  /* Aliases */
+  --color-secondary: var(--color-neutral-800);
+  --color-neutral: var(--color-neutral-600);
+  --color-neutral-light: var(--color-neutral-800);
+
+  /* Borders */
+  --color-border: rgba(255, 255, 255, 0.1);
+  --color-border-strong: rgba(255, 255, 255, 0.15);
+
+  /* Semantic Lights (transparent in dark mode) */
+  --color-error-light: rgba(239, 68, 68, 0.1);
+  --color-success-light: rgba(16, 185, 129, 0.1);
+  --color-warning-light: rgba(245, 158, 11, 0.1);
+  --color-info-light: rgba(59, 130, 246, 0.1);
+
+  /* Shadows for dark mode (reduced intensity) */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+}
+
+/* ─── Reset & Global ──────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-surface);
+  color: var(--color-secondary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+  color: var(--color-neutral-900);
+  line-height: 1.2;
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+button {
+  font-family: var(--font-body);
+}
+
+/* ─── Global Page Title ───────────────────────────────────────── */
+/* Used as the top-level h1 on every page for consistency */
+.page-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-page-title);
+  font-weight: 400;
+  color: var(--color-neutral-900);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin: 0;
+}
+
+/* ─── Global Page Wrapper ─────────────────────────────────────── */
+.page-wrapper {
+  padding: var(--page-padding);
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-background);
+}
+
+/* ─── Global Page Header Row ──────────────────────────────────── */
+.page-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--stack-lg);
+}
+
+/* ─── Global Primary Button ───────────────────────────────────── */
+.btn-primary {
+  background-color: var(--color-primary);
+  color: #ffffff;
+  font-weight: 500;
+  font-size: var(--text-button);
+  padding: 10px 20px;
+  border-radius: var(--radius-pill);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover {
+  background-color: var(--color-primary-hover);
+}
+
+/* ─── Global Secondary Button ─────────────────────────────────── */
+.btn-secondary {
+  background-color: var(--color-background);
+  color: var(--color-secondary);
+  font-weight: 500;
+  font-size: var(--text-button);
+  padding: 10px 20px;
+  border-radius: var(--radius-pill);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--color-border-strong);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-neutral);
+}
+
+/* ─── Global Ghost Button ─────────────────────────────────────── */
+.btn-ghost {
+  background-color: transparent;
+  color: var(--color-neutral);
+  font-weight: 500;
+  font-size: var(--text-button);
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-ghost:hover {
+  background-color: var(--color-surface-hover);
+  color: var(--color-secondary);
+}
+
+/* ─── Global Filter Pill ──────────────────────────────────────── */
+.cl-filter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-background);
+  color: var(--color-secondary);
+  font-family: var(--font-body);
+  font-size: var(--text-13);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+
+.cl-filter-pill:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.cl-filter-pill--active {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background-color: var(--color-primary-light);
+}
+
+/* ─── Global Search Input ─────────────────────────────────────── */
+.search-field {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.search-field__icon {
+  position: absolute;
+  left: 12px;
+  color: var(--color-neutral-light);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+
+.search-field__input {
+  font-family: var(--font-body);
+  font-size: var(--text-body-md);
+  padding: 10px 16px 10px 38px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-background);
+  color: var(--color-secondary);
+  outline: none;
+  transition: all 0.2s;
+  width: 300px;
+}
+
+.search-field__input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
+}
+
+.search-field__input::placeholder {
+  color: var(--color-neutral-light);
+}
+@keyframes fadeInSmooth {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.page-fade-in {
+  animation: fadeInSmooth 0.4s ease-out forwards;
+}
+
+/* ─── Responsive Breakpoints ──────────────────────────────────── */
+
+/* Tablet (≤1024px): sidebar collapses to icon-only */
+@media (max-width: 1024px) {
+  :root {
+    --page-padding: 28px;
+  }
+
+  .search-field__input {
+    width: 220px;
+  }
+}
+
+/* Mobile (≤768px): full-width, hamburger nav */
+@media (max-width: 768px) {
+  :root {
+    --page-padding: 16px;
+    --text-page-title: 32px;
+    --stack-lg: 20px;
+  }
+
+  /* Give space for the fixed hamburger button */
+  .page-wrapper {
+    padding-top: 56px;
+  }
+
+  /* Stack header row on mobile */
+  .page-header-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  /* Search full width on mobile */
+  .search-field {
+    width: 100%;
+  }
+
+  .search-field__input {
+    width: 100%;
+  }
+
+  /* Buttons row wraps */
+  .tsd-header-actions {
+    flex-wrap: wrap;
+    width: 100%;
+    gap: 8px;
+  }
+
+  /* Tables scroll horizontally */
+  .tsd-table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Ensure tables have minimum width */
+  .tsd-table {
+    min-width: 520px;
+  }
+}
+
+/* Small Mobile (≤480px) */
+@media (max-width: 480px) {
+  :root {
+    --text-page-title: 26px;
+    --page-padding: 12px;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    font-size: 13px;
+    padding: 9px 16px;
+  }
+
+  .cl-filter-pill {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+}

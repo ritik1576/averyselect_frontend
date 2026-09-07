@@ -1,0 +1,410 @@
+/* ─── QuestionLibrary Page ────────────────────────────────────── */
+/* page-wrapper, page-header-row, page-title, btn-primary, btn-secondary,
+   btn-ghost, search-field, cl-filter-pill are all global */
+
+.ql-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ─── Metrics ─────────────────────────────────────────────────── */
+.ql-metrics-row {
+  display: flex;
+  gap: var(--stack-md);
+  margin-bottom: var(--stack-md);
+}
+
+.ql-metric-card {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.ql-metric-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ql-metric-icon--orange { background-color: var(--color-warning-light); color: var(--color-primary); }
+.ql-metric-icon--blue   { background-color: var(--color-info-light); color: var(--color-info-dark); }
+.ql-metric-icon--gray   { background-color: var(--color-surface); color: var(--color-neutral); }
+
+.ql-metric-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ql-metric-value {
+  font-family: var(--font-heading);
+  font-size: var(--text-22);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-neutral-900);
+  line-height: 1;
+}
+
+.ql-metric-label {
+  font-size: var(--text-11);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.08em;
+  color: var(--color-neutral);
+  text-transform: uppercase;
+}
+
+/* ─── Filter Bar ──────────────────────────────────────────────── */
+.ql-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: var(--stack-md);
+}
+
+.ql-filter-pills {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.ql-filter-divider {
+  width: 1px;
+  height: 24px;
+  background-color: var(--color-border);
+}
+
+/* ─── Question List ───────────────────────────────────────────── */
+.ql-list {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-background);
+  flex: 1;
+}
+
+.ql-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--color-border);
+  transition: background-color 0.15s;
+}
+
+
+.ql-card:first-child {
+  border-top-left-radius: var(--radius-lg);
+  border-top-right-radius: var(--radius-lg);
+}
+
+.ql-card:last-child {
+  border-bottom-left-radius: var(--radius-lg);
+  border-bottom-right-radius: var(--radius-lg);
+  border-bottom: none;
+}
+
+.ql-card:hover {
+  background-color: var(--color-surface-hover);
+}
+
+.ql-card-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ql-card-title {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-neutral-900);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.ql-card-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ql-tag {
+  font-size: var(--text-11);
+  font-weight: var(--font-weight-semibold);
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-surface);
+  color: var(--color-secondary);
+  border: 1px solid var(--color-border);
+}
+
+.ql-type-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--text-xs);
+  color: var(--color-neutral);
+  font-weight: var(--font-weight-medium);
+}
+
+.ql-time-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--text-xs);
+  color: var(--color-neutral);
+}
+
+.ql-kebab-btn {
+  background: none;
+  border: none;
+  padding: 6px;
+  cursor: pointer;
+  color: var(--color-neutral-light);
+  border-radius: var(--radius-md);
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+}
+
+.ql-kebab-btn:hover {
+  background-color: var(--color-surface);
+  color: var(--color-secondary);
+}
+
+
+/* ─── Create Modal ────────────────────────────────────────────── */
+.ql-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ql-modal {
+  background-color: var(--color-background);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  width: 640px;
+  max-width: 90vw;
+  box-shadow: var(--shadow-md);
+}
+
+.ql-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.ql-modal-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-22);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-neutral-900);
+  margin: 0;
+}
+
+.ql-modal-subtitle {
+  font-size: var(--text-sm);
+  color: var(--color-neutral);
+  margin-bottom: 24px;
+}
+
+.ql-type-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.ql-type-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.ql-type-card:hover {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-light);
+}
+
+.ql-type-card h3 {
+  font-family: var(--font-body);
+  font-size: var(--text-15);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-neutral-900);
+  margin: 0;
+}
+
+.ql-type-card p {
+  font-size: var(--text-13);
+  color: var(--color-neutral);
+  line-height: 1.4;
+  flex: 1;
+}
+
+/* Utilities */
+.ql-flex-1 {
+  flex: 1;
+}
+.ql-w-100 {
+  width: 100%;
+}
+.ql-rotate-90 {
+  transform: rotate(90deg);
+}
+.ql-rotate-m90 {
+  transform: rotate(-90deg);
+}
+.ql-mt-auto {
+  margin-top: auto;
+}
+.ql-mt-sm {
+  margin-top: 12px;
+}
+
+/* ─── Dropdown wrapper ───────────────────────────────────────── */
+.ql-dropdown-wrap {
+  position: relative;
+}
+
+.ql-dropdown-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 999;
+  min-width: 180px;
+  background: var(--color-background);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ql-dropdown-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px 12px;
+  font-family: var(--font-body);
+  font-size: var(--text-13);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-secondary);
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+}
+.ql-dropdown-item:hover {
+  background: var(--color-surface-hover);
+}
+.ql-dropdown-item--active {
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* ─── Active filter pill ─────────────────────────────────────── */
+.cl-filter-pill--active {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background-color: var(--color-primary-light);
+}
+
+/* ─── Chevron rotate ─────────────────────────────────────────── */
+.rotated { transform: rotate(180deg); transition: transform 0.2s; }
+
+/* ─── Search clear button ────────────────────────────────────── */
+.ql-search-wrap {
+  position: relative;
+}
+.ql-search-clear {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-neutral-light);
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  border-radius: var(--radius-full);
+  transition: color 0.15s;
+}
+.ql-search-clear:hover { color: var(--color-primary); }
+
+/* ─── Clear all filters button ───────────────────────────────── */
+.ql-clear-btn {
+  color: var(--color-primary) !important;
+}
+.ql-clear-btn:hover {
+  background: var(--color-primary-light) !important;
+}
+
+/* ─── Empty state ────────────────────────────────────────────── */
+.ql-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+  text-align: center;
+}
+
+.ql-empty-icon {
+  color: var(--color-neutral-light);
+  margin-bottom: var(--stack-md);
+  opacity: 0.6;
+}
+
+.ql-empty-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-secondary);
+  margin-bottom: var(--stack-xs);
+}
+
+.ql-empty-subtitle {
+  font-size: var(--text-13);
+  color: var(--color-neutral);
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+/* ─── List footer ────────────────────────────────────────────── */
+.ql-list-footer {
+  margin-top: auto;
+  font-size: var(--text-13);
+  color: var(--color-neutral);
+  padding: 10px 0 0;
+}

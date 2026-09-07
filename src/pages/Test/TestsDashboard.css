@@ -1,0 +1,241 @@
+/* ─── Tests Dashboard Page ────────────────────────────────────── */
+/* page-wrapper, page-header-row, page-title, btn-primary, search-field are global */
+
+.tsd-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ─── Table Container ─────────────────────────────────────────── */
+.tsd-table-container {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.tsd-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-body);
+}
+
+.tsd-table thead tr {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tsd-table th {
+  padding: 12px 20px;
+  text-align: left;
+  font-size: var(--text-11);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-neutral);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.tsd-table tbody tr {
+  border-bottom: 1px solid var(--color-border);
+  transition: background-color 0.15s;
+}
+
+.tsd-table tbody tr:last-child,
+.tsd-empty-row {
+  border-bottom: none !important;
+}
+
+.tsd-table tbody tr:hover {
+  background-color: var(--color-surface-hover);
+}
+
+.tsd-table td {
+  padding: 18px 20px;
+  font-size: var(--text-sm);
+  color: var(--color-secondary);
+  vertical-align: middle;
+}
+
+/* ─── Test Name Link ──────────────────────────────────────────── */
+.tsd-test-link {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-neutral-900);
+  text-decoration: none;
+  display: block;
+  line-height: 1.4;
+  transition: color 0.15s;
+}
+
+.tsd-test-link:hover {
+  color: var(--color-primary);
+}
+
+/* ─── Candidates Cell ─────────────────────────────────────────── */
+.tsd-candidates-cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.tsd-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-error);
+  flex-shrink: 0;
+}
+
+.tsd-candidate-num {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-secondary);
+}
+
+/* ─── Domain Tags ─────────────────────────────────────────────── */
+.tsd-tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tsd-tag {
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-medium);
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  border: 1px solid transparent;
+}
+
+.tsd-tag--highlight {
+  background-color: var(--color-warning-light);
+  color: var(--color-primary);
+  border-color: var(--color-warning-light);
+}
+
+.tsd-tag--normal {
+  background-color: var(--color-surface);
+  color: var(--color-secondary);
+  border-color: var(--color-border);
+}
+
+/* ─── Last Activity ───────────────────────────────────────────── */
+.tsd-activity {
+  font-size: var(--text-13);
+  color: var(--color-neutral);
+  font-weight: var(--font-weight-medium);
+}
+
+.tsd-sort-icon {
+  vertical-align: middle;
+  color: var(--color-neutral-light);
+}
+
+/* ─── Footer ──────────────────────────────────────────────────── */
+.tsd-table-footer {
+  margin-top: auto;
+  padding: 12px 20px;
+  font-size: var(--text-13);
+  color: var(--color-neutral);
+  border-top: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+}
+
+/* Utilities */
+.d-search-input {
+  width: 280px;
+}
+
+.d-col-center {
+  text-align: center;
+}
+
+/* ─── Sort active state ───────────────────────────────────── */
+.tsd-sort-icon--active { color: var(--color-primary) !important; }
+.tsd-sortable-th { cursor: pointer; user-select: none; }
+.tsd-sortable-th:hover { color: var(--color-secondary); }
+
+/* ─── Search wrapper (needed for clear button positioning) ─── */
+.tsd-search {
+  position: relative;
+}
+
+.tsd-search-clear {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-neutral-light);
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  border-radius: var(--radius-full);
+  transition: color 0.15s;
+}
+.tsd-search-clear:hover { color: var(--color-primary); }
+
+/* ─── Empty state ───────────────────────────────────────── */
+.tsd-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+  text-align: center;
+}
+
+.tsd-empty-icon {
+  color: var(--color-neutral-light);
+  margin-bottom: var(--stack-md);
+  opacity: 0.6;
+}
+
+.tsd-empty-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-secondary);
+  margin-bottom: var(--stack-xs);
+}
+
+.tsd-empty-subtitle {
+  font-size: var(--text-13);
+  color: var(--color-neutral);
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+/* ─── Dashboard candidate meta item ──────────────────────── */
+.dashboard-test-meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-neutral);
+  font-size: var(--text-13);
+  font-weight: var(--font-weight-medium);
+}
+
+/* ─── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .tsd-header-actions {
+    flex-direction: column;
+    width: 100%;
+    gap: 8px;
+  }
+
+  .tsd-search {
+    width: 100%;
+  }
+
+  .d-search-input {
+    width: 100% !important;
+  }
+}
+
