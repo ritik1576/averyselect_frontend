@@ -386,6 +386,41 @@ export const CandidateTestRunner: React.FC = () => {
     setAnswers((prev) => ({ ...prev, [currentQ.id]: text }));
   };
 
+  /**
+   * Converts test case input (which may be JSON like "[10, 5, 20, 8]" or '"hello"' or "42")
+   * into stdin that C++/Java competitive-programming style code can read via cin/Scanner.
+   *
+   * Conversion rules:
+   *  - Array of numbers/booleans → first line: count, second line: space-separated values
+   *  - Array of strings          → first line: count, then one string per line
+   *  - Plain string              → the string value itself (no quotes)
+   *  - Plain number/boolean      → string representation
+   *  - Raw text (not JSON)       → passed as-is
+   */
+  const normalizeStdinForNative = (input: string): string => {
+    const raw = (input ?? '').trim();
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        const count = parsed.length;
+        const isStringArray = parsed.every((x) => typeof x === 'string');
+        if (isStringArray) {
+          // e.g. ["hello", "world"] → "2\nhello\nworld"
+          return `${count}\n${parsed.join('\n')}`;
+        } else {
+          // e.g. [10, 5, 20, 8] → "4\n10 5 20 8"
+          return `${count}\n${parsed.join(' ')}`;
+        }
+      } else if (typeof parsed === 'string') {
+        return parsed; // Strip surrounding quotes
+      } else {
+        return String(parsed);
+      }
+    } catch {
+      return raw; // Already plain text, pass through
+    }
+  };
+
   const handleLanguageChange = (langKey: string) => {
     setSelectedLanguages((prev) => ({ ...prev, [currentQ.id]: langKey }));
     // Reset code answer to starter template for new language if not edited
@@ -432,16 +467,7 @@ export const CandidateTestRunner: React.FC = () => {
 
       if (currentLangKey === 'cpp' || currentLangKey === 'java') {
         wrappedCode = code; // No wrapper, candidate reads from stdin
-        try {
-          const parsedArgs = JSON.parse(tc.input);
-          if (Array.isArray(parsedArgs)) {
-            stdinPayload = parsedArgs.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : String(arg)).join('\n');
-          } else {
-            stdinPayload = String(parsedArgs);
-          }
-        } catch (e) {
-          stdinPayload = String(tc.input);
-        }
+        stdinPayload = normalizeStdinForNative(tc.input);
       } else if (currentLangKey === 'python') {
         wrappedCode = `
 ${code}
