@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Check } from 'lucide-react';
-import type { AssessmentSecuritySettings } from '../../types';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { updateAssessmentRequest } from '../../store/slices/assessmentSlice';
 import './TestSettings.css';
