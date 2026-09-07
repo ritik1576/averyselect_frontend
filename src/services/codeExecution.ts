@@ -30,71 +30,91 @@ export async function executeCode(
   const langConfig = JUDGE0_LANGUAGE_MAP[langKey] || JUDGE0_LANGUAGE_MAP.javascript;
   const startTime = performance.now();
 
-  try {
-    const response = await fetch('https://ce.judge0.com/submissions?wait=true', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        source_code: code,
-        language_id: langConfig.id,
-        stdin: stdin,
-      }),
-    });
+  let retries = 3;
+  let delay = 1500;
+  
+  while (retries > 0) {
+    try {
+      const response = await fetch('https://ce.judge0.com/submissions?wait=true', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          source_code: code,
+          language_id: langConfig.id,
+          stdin: stdin,
+        }),
+      });
 
-    const duration = Math.round(performance.now() - startTime);
+      const duration = Math.round(performance.now() - startTime);
 
-    if (!response.ok) {
-      const errText = await response.text();
-      let parsedErr = errText;
-      try {
-        const jsonErr = JSON.parse(errText);
-        parsedErr = jsonErr.error || jsonErr.message || errText;
-      } catch (_) {}
+      if (response.status === 429) {
+          retries--;
+          await new Promise(r => setTimeout(r, delay));
+          delay *= 2;
+          continue;
+      }
+
+      if (!response.ok) {
+        const errText = await response.text();
+        let parsedErr = errText;
+        try { parsedErr = JSON.parse(errText).message || errText; } catch {}
+        
+        return {
+          stdout: '',
+          stderr: parsedErr,
+          output: parsedErr,
+          exitCode: 1,
+          language: langConfig.label,
+          statusDescription: 'API Error',
+        };
+      }
+
+      const data = await response.json();
+      
+      const stdout = data.stdout || '';
+      const compileOutput = data.compile_output || '';
+      const stderr = data.stderr || compileOutput || data.message || '';
+      const exitCode = data.status?.id === 3 ? 0 : (data.status?.id || 1);
+      
+      const output = stdout ? (stderr ? `${stdout}\n\nErrors:\n${stderr}` : stdout) : stderr;
 
       return {
-        stdout: '',
-        stderr: `Compile / Execution Error: ${parsedErr}`,
-        output: `Compilation Failed (${response.status})`,
-        exitCode: 1,
-        executionTimeMs: duration,
+        stdout,
+        stderr,
+        output,
+        exitCode,
+        executionTimeMs: Math.round((parseFloat(data.time) || 0) * 1000) || duration,
+        memoryKb: data.memory,
         language: langConfig.label,
-        statusDescription: 'Compile Error',
-        error: parsedErr,
+        statusDescription: data.status?.description || 'Unknown Status',
       };
+    } catch (error: any) {
+      retries--;
+      if (retries === 0) {
+        return {
+          stdout: '',
+          stderr: error.message || 'Network error occurred',
+          output: error.message || 'Network error occurred',
+          exitCode: 1,
+          language: langConfig.label,
+          statusDescription: 'Network Error',
+        };
+      } else {
+        await new Promise(r => setTimeout(r, delay));
+        delay *= 2;
+      }
     }
-
-    const data = await response.json();
-
-    const stdout = data.stdout || '';
-    const compileOutput = data.compile_output || '';
-    const stderr = data.stderr || compileOutput || data.message || '';
-    const statusDesc = data.status?.description || 'Completed';
-    const isSuccess = data.status?.id === 3; // 3 = Accepted in Judge0
-    const timeMs = data.time ? Math.round(parseFloat(data.time) * 1000) : duration;
-
-    return {
-      stdout,
-      stderr,
-      output: stdout || stderr || statusDesc,
-      exitCode: isSuccess ? 0 : 1,
-      executionTimeMs: timeMs,
-      memoryKb: data.memory,
-      language: langConfig.label,
-      statusDescription: statusDesc,
-    };
-  } catch (err: any) {
-    const duration = Math.round(performance.now() - startTime);
-    return {
-      stdout: '',
-      stderr: err?.message || 'Network error connecting to execution server',
-      output: `Execution Failed: ${err?.message || 'Network error'}`,
-      exitCode: 1,
-      executionTimeMs: duration,
-      language: langConfig.label,
-      statusDescription: 'Network Error',
-      error: err?.message,
-    };
   }
+  
+  // Fallback (should never be reached due to retries=0 throw)
+  return {
+    stdout: '',
+    stderr: 'Max retries exceeded',
+    output: 'Max retries exceeded',
+    exitCode: 1,
+    language: langConfig.label,
+    statusDescription: 'Network Error',
+  };
 }
