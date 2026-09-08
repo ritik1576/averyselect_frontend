@@ -773,12 +773,17 @@ try {
               <div className="tr-editor-container">
                 <Suspense fallback={<GlobalLoader />}>
                   <Editor 
-                    height="280px"
+                    height="230px"
                     language={currentLangConfig.monacoLang}
                     theme="vs-dark"
                     value={answers[currentQ.id] ?? defaultStarterCode}
                     onChange={handleCodeChange}
-                    options={{ fontSize: 14, minimap: { enabled: false } }}
+                    options={{ 
+                      fontSize: 14, 
+                      minimap: { enabled: false },
+                      automaticLayout: true,
+                      scrollBeyondLastLine: false,
+                    }}
                   />
                 </Suspense>
               </div>
