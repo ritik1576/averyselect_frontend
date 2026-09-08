@@ -981,9 +981,9 @@
 }
 
 .tr-fs-btn {
-  background-color: var(--color-primary);
-  color: var(--color-white);
-  border: none;
+  background-color: var(--color-background);
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary);
   padding: 6px 12px;
   border-radius: var(--radius-pill);
   font-size: var(--text-xs);
@@ -992,11 +992,11 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
 }
 
 .tr-fs-btn:hover {
-  background-color: var(--color-primary-hover);
+  background-color: var(--color-primary-light);
 }
 
 .tr-webcam-placeholder {
