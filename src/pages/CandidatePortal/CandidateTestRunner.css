@@ -498,6 +498,41 @@
   border-bottom: 1px solid var(--color-neutral-700);
 }
 
+.tr-console-card.collapsed {
+  min-height: auto !important;
+}
+
+.tr-console-card.collapsed .tr-console-top-row {
+  border-bottom: none;
+}
+
+.tr-console-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tr-console-toggle-btn {
+  background-color: var(--color-neutral-700);
+  border: 1px solid var(--color-neutral-600);
+  color: var(--color-neutral-200);
+  padding: 4px 10px;
+  border-radius: var(--radius-6);
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-semibold);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tr-console-toggle-btn:hover {
+  background-color: var(--color-neutral-600);
+  color: var(--color-white);
+  border-color: var(--color-neutral-500);
+}
+
 .tr-tc-tabs {
   display: flex;
   gap: 8px;

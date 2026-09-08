@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Clock, CheckCircle2, ChevronLeft, ChevronRight, AlertTriangle, Play, Send, ShieldAlert, X, Maximize, Camera, WifiOff, LayoutGrid } from 'lucide-react';
+import { Clock, CheckCircle2, ChevronLeft, ChevronRight, AlertTriangle, Play, Send, ShieldAlert, X, Maximize, Camera, WifiOff, LayoutGrid, ChevronDown, ChevronUp } from 'lucide-react';
 import { GlobalLoader } from '../../components/ui';
 import { useDispatch } from 'react-redux';
 import { useAppSelector } from '../../store/hooks';
@@ -108,6 +108,7 @@ export const CandidateTestRunner: React.FC = () => {
 
   const [selectedLanguages, setSelectedLanguages] = useState<Record<string, string>>({});
   const [codeOutputs, setCodeOutputs] = useState<Record<string, TerminalResult>>({});
+  const [collapsedConsole, setCollapsedConsole] = useState<Record<string, boolean>>({});
   const [activeTestCaseTab, setActiveTestCaseTab] = useState<Record<string, number>>({});
   const [isExecuting, setIsExecuting] = useState(false);
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
@@ -432,6 +433,7 @@ export const CandidateTestRunner: React.FC = () => {
   const handleRunCode = async () => {
     const code = answers[currentQ.id] ?? defaultStarterCode;
     setIsExecuting(true);
+    setCollapsedConsole((prev) => ({ ...prev, [currentQ.id]: false }));
 
     setCodeOutputs((prev) => ({
       ...prev,
@@ -773,7 +775,7 @@ try {
               <div className="tr-editor-container">
                 <Suspense fallback={<GlobalLoader />}>
                   <Editor 
-                    height="230px"
+                    height="360px"
                     language={currentLangConfig.monacoLang}
                     theme="vs-dark"
                     value={answers[currentQ.id] ?? defaultStarterCode}
@@ -789,7 +791,7 @@ try {
               </div>
 
               {codeOutputs[currentQ.id] && (
-                <div className="tr-console-card">
+                <div className={`tr-console-card ${collapsedConsole[currentQ.id] ? 'collapsed' : ''}`}>
                   <div className="tr-console-top-row">
                     <div className={`tr-status-pill ${codeOutputs[currentQ.id].status}`}>
                       {codeOutputs[currentQ.id].status === 'passed' && <CheckCircle2 size={15} />}
@@ -797,17 +799,31 @@ try {
                       <span>{codeOutputs[currentQ.id].statusText}</span>
                     </div>
 
-                    {codeOutputs[currentQ.id].status !== 'running' && (
-                      <div className="tr-console-metrics">
-                        <span>⏱ {codeOutputs[currentQ.id].timeMs}ms</span>
-                        {codeOutputs[currentQ.id].memoryKb && (
-                          <span>💾 {(codeOutputs[currentQ.id].memoryKb! / 1024).toFixed(1)} MB</span>
-                        )}
-                      </div>
-                    )}
+                    <div className="tr-console-header-actions">
+                      {codeOutputs[currentQ.id].status !== 'running' && (
+                        <div className="tr-console-metrics">
+                          <span>⏱ {codeOutputs[currentQ.id].timeMs}ms</span>
+                          {codeOutputs[currentQ.id].memoryKb && (
+                            <span>💾 {(codeOutputs[currentQ.id].memoryKb! / 1024).toFixed(1)} MB</span>
+                          )}
+                        </div>
+                      )}
+
+                      <button
+                        type="button"
+                        className="tr-console-toggle-btn"
+                        onClick={() => setCollapsedConsole((prev) => ({ ...prev, [currentQ.id]: !prev[currentQ.id] }))}
+                        title={!collapsedConsole[currentQ.id] ? 'Minimize Test Results' : 'Expand Test Results'}
+                      >
+                        {!collapsedConsole[currentQ.id] ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
+                        <span>{!collapsedConsole[currentQ.id] ? 'Minimize' : 'Expand'}</span>
+                      </button>
+                    </div>
                   </div>
 
-                  {/* Test Cases Results Tabs */}
+                  {!collapsedConsole[currentQ.id] && (
+                    <>
+                      {/* Test Cases Results Tabs */}
                   {codeOutputs[currentQ.id].testCaseResults && (
                     <div className="tr-tc-tabs">
                       {codeOutputs[currentQ.id].testCaseResults!.map((tc) => {
@@ -868,6 +884,8 @@ try {
                       </div>
                     )}
                   </div>
+                    </>
+                  )}
                 </div>
               )}
             </div>
