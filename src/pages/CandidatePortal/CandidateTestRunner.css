@@ -269,6 +269,7 @@
   display: flex;
   flex: 1;
   overflow: hidden;
+  min-height: 0;
 }
 
 .tr-body-inner {
@@ -276,6 +277,8 @@
   flex: 1;
   width: 100%;
   height: 100%;
+  min-height: 0;
+  max-height: 100%;
 }
 
 .tr-left-pane {
@@ -284,6 +287,8 @@
   border-right: 1px solid var(--color-neutral-200);
   padding: 32px;
   overflow-y: auto;
+  height: 100%;
+  box-sizing: border-box;
 }
 
 .tr-q-meta {
@@ -329,10 +334,12 @@
 .tr-right-pane {
   width: 55%;
   background-color: var(--color-surface);
-  padding: 32px;
+  padding: 24px 32px 140px 32px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+  height: 100%;
+  box-sizing: border-box;
 }
 
 .tr-section-label {
@@ -641,8 +648,10 @@
   font-family: monospace;
   font-size: var(--text-13);
   line-height: 1.5;
-  max-height: 400px;
+  max-height: 480px;
   overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-neutral-600) var(--color-neutral-800);
 }
 
 .tr-output-code {
@@ -857,7 +866,7 @@
 .tr-webcam-preview {
   position: fixed;
   bottom: 88px;
-  right: 24px;
+  left: 24px;
   width: 140px;
   height: 95px;
   background-color: var(--color-neutral-900);
@@ -1039,4 +1048,43 @@
 
 .tr-q-desc li {
   margin-bottom: 4px;
+}
+
+/* ─── Custom Visible Scrollbars ────────────────────────────────────────── */
+.tr-right-pane::-webkit-scrollbar,
+.tr-left-pane::-webkit-scrollbar,
+.tr-console-body::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.tr-right-pane::-webkit-scrollbar-track,
+.tr-left-pane::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 4px;
+}
+
+.tr-console-body::-webkit-scrollbar-track {
+  background: #0f172a;
+  border-radius: 4px;
+}
+
+.tr-right-pane::-webkit-scrollbar-thumb,
+.tr-left-pane::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.tr-right-pane::-webkit-scrollbar-thumb:hover,
+.tr-left-pane::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.tr-console-body::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 4px;
+}
+
+.tr-console-body::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
 }
