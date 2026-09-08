@@ -773,7 +773,7 @@ try {
               <div className="tr-editor-container">
                 <Suspense fallback={<GlobalLoader />}>
                   <Editor 
-                    height="340px"
+                    height="280px"
                     language={currentLangConfig.monacoLang}
                     theme="vs-dark"
                     value={answers[currentQ.id] ?? defaultStarterCode}
