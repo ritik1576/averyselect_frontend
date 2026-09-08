@@ -411,7 +411,8 @@
 .tr-code-wrapper {
   display: flex;
   flex-direction: column;
-  min-height: 100%;
+  flex-shrink: 0;
+  width: 100%;
 }
 
 .tr-code-toolbar {
@@ -422,6 +423,7 @@
   padding: 10px 16px;
   border-top-left-radius: 12px;
   border-top-right-radius: 12px;
+  flex-shrink: 0;
 }
 
 .tr-lang-selector-group {
@@ -473,6 +475,9 @@
   border-bottom-left-radius: 12px;
   border-bottom-right-radius: 12px;
   overflow: hidden;
+  height: 380px !important;
+  min-height: 380px !important;
+  flex-shrink: 0 !important;
 }
 
 /* ─── Refined LeetCode Terminal Console ──────────────────────────────── */
@@ -484,7 +489,7 @@
   overflow: hidden;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
   color: var(--color-neutral-50);
-  min-height: 380px;
+  flex-shrink: 0 !important;
   display: flex;
   flex-direction: column;
 }
