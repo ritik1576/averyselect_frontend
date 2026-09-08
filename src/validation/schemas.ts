@@ -25,7 +25,7 @@ export type CreateAssessmentFormValues = z.infer<typeof createAssessmentSchema>;
 
 // ─── Multiple Choice Question Schema ────────────────────────────────────────
 export const mcqOptionSchema = z.object({
-  id: z.string(),
+  id: z.string().optional(),
   text: z.string().min(1, 'Option text cannot be empty'),
   is_correct: z.boolean(),
 });
@@ -73,7 +73,7 @@ export type FreeTextFormValues = z.infer<typeof createFreeTextSchema>;
 
 // ─── Test Case Schema ────────────────────────────────────────────────────────
 export const testCaseSchema = z.object({
-  id: z.string(),
+  id: z.string().optional(),
   title: z.string().min(1, 'Title is required'),
   input: z.string().min(1, 'Input is required'),
   expected_output: z.string().min(1, 'Expected output is required'),
