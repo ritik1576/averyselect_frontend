@@ -124,7 +124,7 @@ export const CodingEditor: React.FC = () => {
           ? new Date(currentQuestion.estimated_time_seconds * 1000).toISOString().substring(11, 16)
           : '00:15',
         language: ((currentQuestion as any).language as SupportedLanguage) ?? 'javascript',
-        starter_code: (currentQuestion as any).starter_code ?? '',
+        starter_code: (currentQuestion as any).starter_code || STARTER_CODE_TEMPLATES[((currentQuestion as any).language as SupportedLanguage) || 'javascript'] || STARTER_CODE_TEMPLATES.javascript,
         test_cases: (currentQuestion as any).test_cases?.length
           ? (currentQuestion as any).test_cases.map((tc: any, idx: number) => ({
               id: tc.id ?? `tc-${idx}`,
@@ -144,6 +144,8 @@ export const CodingEditor: React.FC = () => {
 
     const payload = {
       ...data,
+      language: selectedLanguage,
+      starter_code: starterCode,
       question_type: 'coding' as const,
       estimated_time_seconds
     };
