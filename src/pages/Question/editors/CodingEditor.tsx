@@ -2,6 +2,7 @@ import React, { Suspense, lazy } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft, Save, Plus, Trash2, Eye, EyeOff } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useAppSelector } from '../../../store/hooks';
@@ -113,17 +114,27 @@ export const CodingEditor: React.FC = () => {
   }, [id, dispatch]);
 
   React.useEffect(() => {
-    if (id && currentQuestion && currentQuestion.id === id) {
+    if (id && currentQuestion && String(currentQuestion.id) === String(id)) {
       reset({
-        ...currentQuestion,
-        language: currentQuestion.language as any,
-        test_cases: currentQuestion.test_cases?.length
-          ? currentQuestion.test_cases
-          : [{ id: 'tc-1', title: 'Test 1', input: '', expected_output: '', is_hidden: false }],
+        title: (currentQuestion as any).title ?? '',
+        description: (currentQuestion as any).description ?? (currentQuestion as any).text ?? '',
+        difficulty: (currentQuestion as any).difficulty ?? 3,
+        points: (currentQuestion as any).points ?? 50,
         estimated_time: currentQuestion.estimated_time_seconds
           ? new Date(currentQuestion.estimated_time_seconds * 1000).toISOString().substring(11, 16)
-          : '00:15'
-      } as any);
+          : '00:15',
+        language: ((currentQuestion as any).language as SupportedLanguage) ?? 'javascript',
+        starter_code: (currentQuestion as any).starter_code ?? '',
+        test_cases: (currentQuestion as any).test_cases?.length
+          ? (currentQuestion as any).test_cases.map((tc: any, idx: number) => ({
+              id: tc.id ?? `tc-${idx}`,
+              title: tc.title ?? `Test Case ${idx + 1}`,
+              input: tc.input ?? '',
+              expected_output: tc.expected_output ?? tc.expectedOutput ?? '',
+              is_hidden: tc.is_hidden ?? tc.isHidden ?? false,
+            }))
+          : [{ id: 'tc-1', title: 'Test Case 1', input: '', expected_output: '', is_hidden: false }],
+      });
     }
   }, [id, currentQuestion, reset]);
 
@@ -154,20 +165,38 @@ export const CodingEditor: React.FC = () => {
   const selectedLangOption = LANGUAGE_OPTIONS.find((l) => l.value === selectedLanguage) ?? LANGUAGE_OPTIONS[0];
 
   return (
-    <form className="page-question-editor" onSubmit={handleSubmit(onSubmit)} noValidate>
+    <form className="page-question-editor" onSubmit={handleSubmit(onSubmit, (errs) => {
+      const firstErrorKey = Object.keys(errs)[0];
+      if (firstErrorKey) {
+        const error = errs[firstErrorKey as keyof CodingFormValues];
+        if (error && typeof error === 'object' && 'message' in error) {
+          toast.error(`Validation Error: ${error.message}`);
+        } else if (Array.isArray(error)) {
+          const firstItemWithErr = error.find(e => e !== undefined);
+          if (firstItemWithErr) {
+            const firstSubKey = Object.keys(firstItemWithErr)[0];
+            toast.error(`Validation Error in Test Cases: ${firstItemWithErr[firstSubKey]?.message}`);
+          } else {
+             toast.error(`Validation Error in ${firstErrorKey}`);
+          }
+        } else {
+          toast.error(`Validation Error in ${firstErrorKey}`);
+        }
+      }
+    })} noValidate>
       <div className="editor-top-bar">
         <Link to="/dashboard/questions" className="back-link">
           <ArrowLeft size={16} />
           <span>Back to Library</span>
         </Link>
-        <div className="editor-actions">
-          <Button variant="ghost" type="button">Cancel</Button>
-          <Button icon={<Save size={16} />} type="submit" disabled={loading} className={loading ? "opacity-50 cursor-not-allowed" : ""}>
-            {loading ? 'Saving...' : 'Save Exercise'}
+        <div className="editor-top-actions">
+          <Button type="button" variant="outline" onClick={() => navigate('/dashboard/questions')}>Cancel</Button>
+          <Button icon={<Save size={16} />} type="submit" variant="primary" disabled={loading} className={loading ? "opacity-50 cursor-not-allowed" : ""}>
+            {loading ? 'Saving...' : 'Save Question'}
           </Button>
         </div>
       </div>
-
+      
       <div className="editor-content-wrapper">
         {/* ── Main Panel ─────────────────────────────────── */}
         <div className="editor-main-panel">
