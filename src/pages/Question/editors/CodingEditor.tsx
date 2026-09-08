@@ -2,6 +2,7 @@ import React, { Suspense, lazy } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft, Save, Plus, Trash2, Eye, EyeOff } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useAppSelector } from '../../../store/hooks';
@@ -164,20 +165,38 @@ export const CodingEditor: React.FC = () => {
   const selectedLangOption = LANGUAGE_OPTIONS.find((l) => l.value === selectedLanguage) ?? LANGUAGE_OPTIONS[0];
 
   return (
-    <form className="page-question-editor" onSubmit={handleSubmit(onSubmit)} noValidate>
+    <form className="page-question-editor" onSubmit={handleSubmit(onSubmit, (errs) => {
+      const firstErrorKey = Object.keys(errs)[0];
+      if (firstErrorKey) {
+        const error = errs[firstErrorKey as keyof CodingFormValues];
+        if (error && typeof error === 'object' && 'message' in error) {
+          toast.error(`Validation Error: ${error.message}`);
+        } else if (Array.isArray(error)) {
+          const firstItemWithErr = error.find(e => e !== undefined);
+          if (firstItemWithErr) {
+            const firstSubKey = Object.keys(firstItemWithErr)[0];
+            toast.error(`Validation Error in Test Cases: ${firstItemWithErr[firstSubKey]?.message}`);
+          } else {
+             toast.error(`Validation Error in ${firstErrorKey}`);
+          }
+        } else {
+          toast.error(`Validation Error in ${firstErrorKey}`);
+        }
+      }
+    })} noValidate>
       <div className="editor-top-bar">
         <Link to="/dashboard/questions" className="back-link">
           <ArrowLeft size={16} />
           <span>Back to Library</span>
         </Link>
-        <div className="editor-actions">
-          <Button variant="ghost" type="button">Cancel</Button>
-          <Button icon={<Save size={16} />} type="submit" disabled={loading} className={loading ? "opacity-50 cursor-not-allowed" : ""}>
-            {loading ? 'Saving...' : 'Save Exercise'}
+        <div className="editor-top-actions">
+          <Button type="button" variant="outline" onClick={() => navigate('/dashboard/questions')}>Cancel</Button>
+          <Button icon={<Save size={16} />} type="submit" variant="primary" disabled={loading} className={loading ? "opacity-50 cursor-not-allowed" : ""}>
+            {loading ? 'Saving...' : 'Save Question'}
           </Button>
         </div>
       </div>
-
+      
       <div className="editor-content-wrapper">
         {/* ── Main Panel ─────────────────────────────────── */}
         <div className="editor-main-panel">
