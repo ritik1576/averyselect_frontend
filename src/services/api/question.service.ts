@@ -99,8 +99,11 @@ export const questionService = {
           ...opt,
           is_correct: opt.isCorrect !== undefined ? opt.isCorrect : opt.is_correct
         })),
+        language: q.questionLanguages?.[0]?.language?.name || 'javascript',
+        starter_code: q.questionLanguages?.[0]?.starterCode || '',
         test_cases: q.testCases?.map((tc: any) => ({
           ...tc,
+          title: tc.title || '',
           expected_output: tc.expectedOutput !== undefined ? tc.expectedOutput : tc.expected_output,
           is_hidden: tc.isHidden !== undefined ? tc.isHidden : tc.is_hidden
         }))
@@ -131,6 +134,7 @@ export const questionService = {
     
     if (payload.test_cases && Array.isArray(payload.test_cases)) {
       payload.testCases = payload.test_cases.map((tc: any) => ({
+        title: tc.title,
         input: tc.input,
         expectedOutput: tc.expected_output,
         isHidden: tc.is_hidden
