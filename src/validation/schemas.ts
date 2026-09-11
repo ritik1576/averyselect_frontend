@@ -80,8 +80,22 @@ export const testCaseSchema = z.object({
   is_hidden: z.boolean(),
 });
 
+export const functionParameterSchema = z.object({
+  name: z.string().regex(/^[a-zA-Z_][a-zA-Z0-9_]*$/, 'Must be a valid variable name'),
+  type: z.enum(['int', 'double', 'boolean', 'string', 'int[]', 'double[]', 'boolean[]', 'string[]']),
+});
+
+export const functionContractSchema = z.object({
+  functionName: z.string().regex(/^[a-zA-Z_][a-zA-Z0-9_]*$/, 'Must be a valid function name'),
+  parameters: z.array(functionParameterSchema).refine((params) => {
+    const names = params.map(p => p.name);
+    return new Set(names).size === names.length;
+  }, 'Parameter names must be unique'),
+  returnType: z.enum(['int', 'double', 'boolean', 'string', 'int[]', 'double[]', 'boolean[]', 'string[]']),
+});
+
 // ─── Coding Question Schema ──────────────────────────────────────────────────
-export const createCodingSchema = z.object({
+export const createCodingSchemaBase = z.object({
   title: z
     .string()
     .min(5, 'Title must be at least 5 characters'),
@@ -94,6 +108,29 @@ export const createCodingSchema = z.object({
   test_cases: z
     .array(testCaseSchema)
     .min(1, 'At least 1 test case is required'),
+  executionMode: z.enum(['FULL_PROGRAM', 'FUNCTION']).default('FULL_PROGRAM'),
+  functionContract: functionContractSchema.nullable().optional(),
+  comparisonMode: z.enum(['EXACT', 'TRIMMED', 'TOKENIZED', 'JSON', 'FLOAT']).default('TRIMMED'),
 });
 
-export type CodingFormValues = z.infer<typeof createCodingSchema>;
+export const createCodingSchema = createCodingSchemaBase
+  .refine(data => {
+    if (data.executionMode === 'FUNCTION' && (!data.functionContract || !data.functionContract.functionName)) {
+      return false;
+    }
+    return true;
+  }, {
+    message: 'Function contract is required when execution mode is FUNCTION',
+    path: ['functionContract']
+  })
+  .refine(data => {
+    if (data.executionMode === 'FULL_PROGRAM' && data.functionContract) {
+      return false;
+    }
+    return true;
+  }, {
+    message: 'Function contract must not be defined for FULL_PROGRAM',
+    path: ['functionContract']
+  });
+
+export type CodingFormValues = z.infer<typeof createCodingSchemaBase>;

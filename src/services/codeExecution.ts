@@ -44,6 +44,7 @@ export async function executeCode(
           source_code: btoa(unescape(encodeURIComponent(code))),
           language_id: langConfig.id,
           stdin: btoa(unescape(encodeURIComponent(stdin))),
+          compiler_options: langConfig.id === 105 ? '-std=c++20 -O2' : undefined,
         }),
       });
 

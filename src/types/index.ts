@@ -13,6 +13,19 @@ export type AttemptStatus = 'not_started' | 'in_progress' | 'submitted' | 'evalu
 export type ResultStatus = 'pending' | 'passed' | 'failed' | 'reviewed';
 export type AssessmentLanguage = 'English' | 'French' | 'Spanish';
 
+export type ExecutionMode = 'FULL_PROGRAM' | 'FUNCTION';
+
+export interface FunctionParameter {
+  name: string;
+  type: 'int' | 'double' | 'boolean' | 'string' | 'int[]' | 'double[]' | 'boolean[]' | 'string[]';
+}
+
+export interface FunctionContract {
+  functionName: string;
+  parameters: FunctionParameter[];
+  returnType: 'int' | 'double' | 'boolean' | 'string' | 'int[]' | 'double[]' | 'boolean[]' | 'string[]';
+}
+
 // ─── Companies ────────────────────────────────────────────────
 
 export interface Company {
@@ -64,6 +77,8 @@ export interface Question {
   difficulty: number;              // 1–5 (star rating)
   estimated_time_seconds: number;  // e.g. 1200 = 20 minutes
   status: QuestionStatus;
+  executionMode: ExecutionMode;
+  functionContract: FunctionContract | null;
   created_at: string;
   updated_at: string;
   _count?: {
