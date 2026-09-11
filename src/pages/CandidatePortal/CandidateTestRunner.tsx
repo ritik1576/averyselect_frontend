@@ -7,6 +7,7 @@ import { useAppSelector } from '../../store/hooks';
 import { publicService } from '../../services/api/public.service';
 import { candidateService } from '../../services/api/candidate.service';
 import { fetchTestPayloadRequest, submitTestRequest } from '../../store/slices/sessionSlice';
+import { getStarterCode, isStaleStarterCode } from '../../utils/starterCode';
 
 const Editor = React.lazy(() => import('@monaco-editor/react'));
 import ReactMarkdown from 'react-markdown';
@@ -148,7 +149,34 @@ export const CandidateTestRunner: React.FC = () => {
   const currentLangKey = selectedLanguages[currentQ?.id] || 'javascript';
   const currentLangConfig = LANGUAGE_TEMPLATES[currentLangKey] || LANGUAGE_TEMPLATES.javascript;
   const currentQLang = currentQ?.languages?.find((l: any) => l.languageName.toLowerCase() === currentLangKey.toLowerCase());
-  const defaultStarterCode = currentQLang?.starterCode ?? currentLangConfig.starter;
+  
+  const defaultStarterCode = React.useMemo(() => {
+    if (!currentQ) return '';
+    const mode = currentQ.executionMode || 'FULL_PROGRAM';
+    const contract = currentQ.functionContract;
+    if (mode === 'FUNCTION' && contract?.functionName) {
+      if (currentQLang?.starterCode && !isStaleStarterCode(currentQLang.starterCode)) {
+        return currentQLang.starterCode;
+      }
+      return getStarterCode(currentLangKey, 'FUNCTION', contract);
+    }
+    return currentQLang?.starterCode ?? currentLangConfig.starter;
+  }, [currentQ, currentLangKey, currentQLang, currentLangConfig]);
+
+  const currentAnswer = answers[currentQ?.id];
+  const editorCode = React.useMemo(() => {
+    if (currentAnswer !== undefined && currentAnswer !== null) {
+      if (
+        currentQ?.executionMode === 'FUNCTION' &&
+        currentQ?.functionContract?.functionName &&
+        isStaleStarterCode(currentAnswer)
+      ) {
+        return defaultStarterCode;
+      }
+      return currentAnswer;
+    }
+    return defaultStarterCode;
+  }, [currentAnswer, currentQ, defaultStarterCode]);
 
   // Fullscreen Request Handler (Triggers on User Gesture)
   const handleEnterFullscreen = () => {
@@ -424,9 +452,22 @@ export const CandidateTestRunner: React.FC = () => {
 
   const handleLanguageChange = (langKey: string) => {
     setSelectedLanguages((prev) => ({ ...prev, [currentQ.id]: langKey }));
-    // Reset code answer to starter template for new language if not edited
-    const qLang = currentQ?.languages?.find((l: any) => l.languageName.toLowerCase() === langKey.toLowerCase());
-    const newTemplate = qLang?.starterCode ?? LANGUAGE_TEMPLATES[langKey]?.starter ?? '';
+    const mode = currentQ?.executionMode || 'FULL_PROGRAM';
+    const contract = currentQ?.functionContract;
+    let newTemplate = '';
+
+    if (mode === 'FUNCTION' && contract?.functionName) {
+      const qLang = currentQ?.languages?.find((l: any) => l.languageName.toLowerCase() === langKey.toLowerCase());
+      if (qLang?.starterCode && !isStaleStarterCode(qLang.starterCode)) {
+        newTemplate = qLang.starterCode;
+      } else {
+        newTemplate = getStarterCode(langKey, 'FUNCTION', contract);
+      }
+    } else {
+      const qLang = currentQ?.languages?.find((l: any) => l.languageName.toLowerCase() === langKey.toLowerCase());
+      newTemplate = qLang?.starterCode ?? LANGUAGE_TEMPLATES[langKey]?.starter ?? '';
+    }
+
     setAnswers((prev) => ({ ...prev, [currentQ.id]: newTemplate }));
   };
 
@@ -680,7 +721,7 @@ export const CandidateTestRunner: React.FC = () => {
                     height="380px"
                     language={currentLangConfig.monacoLang}
                     theme="vs-dark"
-                    value={answers[currentQ.id] ?? defaultStarterCode}
+                    value={editorCode}
                     onChange={handleCodeChange}
                     options={{ 
                       fontSize: 14, 

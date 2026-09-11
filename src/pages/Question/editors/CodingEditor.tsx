@@ -11,6 +11,7 @@ import type { CodingFormValues } from '../../../validation/schemas';
 import { Heading, Text, Button } from '@/components/ui';
 import { createQuestionRequest, updateQuestionRequest, fetchQuestionByIdRequest } from '../../../store/slices/questionSlice';
 import { EditorSettingsPanel } from '../../../components/layout/EditorSettingsPanel';
+import { getStarterCode, isStaleStarterCode, getFullProgramStarterCode } from '../../../utils/starterCode';
 import '../QuestionEditor.css';
 
 const MonacoEditor = lazy(() =>
@@ -28,44 +29,11 @@ const LANGUAGE_OPTIONS: { value: SupportedLanguage; label: string; monacoLang: s
 ];
 
 const STARTER_CODE_TEMPLATES: Record<SupportedLanguage, string> = {
-  javascript: `/**
- * @param {any} input
- * @return {any}
- */
-function solution(input) {
-  // Write your solution here
-
-}
-
-module.exports = solution;`,
-  python: `def solution(input):
-    # Write your solution here
-    pass`,
-  typescript: `function solution(input: any): any {
-  // Write your solution here
-}
-
-export default solution;`,
-  java: `public class Solution {
-    public static Object solution(Object input) {
-        // Write your solution here
-        return null;
-    }
-}`,
-  cpp: `#include <iostream>
-#include <vector>
-#include <string>
-#include <algorithm>
-#include <map>
-#include <set>
-#include <unordered_map>
-#include <unordered_set>
-using namespace std;
-
-// Write your solution here
-string solution(string input) {
-    return input;
-}`,
+  javascript: getFullProgramStarterCode('javascript'),
+  python: getFullProgramStarterCode('python'),
+  typescript: getFullProgramStarterCode('typescript'),
+  java: getFullProgramStarterCode('java'),
+  cpp: getFullProgramStarterCode('cpp'),
 };
 
 export const CodingEditor: React.FC = () => {
@@ -126,8 +94,17 @@ export const CodingEditor: React.FC = () => {
 
   const handleLanguageChange = (lang: SupportedLanguage) => {
     setValue('language', lang);
-    setValue('starter_code', STARTER_CODE_TEMPLATES[lang]);
+    setValue('starter_code', getStarterCode(lang, currentExecutionMode, functionContract));
   };
+
+  // Synchronize starter code in FUNCTION mode whenever starterCode is stale or empty
+  React.useEffect(() => {
+    if (currentExecutionMode === 'FUNCTION' && functionContract?.functionName) {
+      if (isStaleStarterCode(starterCode)) {
+        setValue('starter_code', getStarterCode(selectedLanguage, 'FUNCTION', functionContract));
+      }
+    }
+  }, [currentExecutionMode, functionContract, selectedLanguage, starterCode, setValue]);
 
 
 
@@ -139,29 +116,41 @@ export const CodingEditor: React.FC = () => {
   }, [id, dispatch]);
 
   React.useEffect(() => {
-    if (id && currentQuestion && String(currentQuestion.id) === String(id)) {
-      reset({
-        title: (currentQuestion as any).title ?? '',
-        description: (currentQuestion as any).description ?? (currentQuestion as any).text ?? '',
-        difficulty: (currentQuestion as any).difficulty ?? 3,
-        points: (currentQuestion as any).points ?? 50,
-        estimated_time: currentQuestion.estimated_time_seconds
-          ? new Date(currentQuestion.estimated_time_seconds * 1000).toISOString().substring(11, 16)
-          : '00:15',
-        language: ((currentQuestion as any).language as SupportedLanguage) ?? 'javascript',
-        starter_code: (currentQuestion as any).starter_code || STARTER_CODE_TEMPLATES[((currentQuestion as any).language as SupportedLanguage) || 'javascript'] || STARTER_CODE_TEMPLATES.javascript,
-        test_cases: (currentQuestion as any).test_cases?.length
-          ? (currentQuestion as any).test_cases.map((tc: any, idx: number) => ({
-              id: tc.id ?? `tc-${idx}`,
-              title: tc.title ?? `Test Case ${idx + 1}`,
-              input: tc.input ?? '',
-              expected_output: tc.expected_output ?? tc.expectedOutput ?? '',
-              is_hidden: tc.is_hidden ?? tc.isHidden ?? false,
-            }))
-          : [{ id: 'tc-1', title: 'Test Case 1', input: '', expected_output: '', is_hidden: false }],
-        executionMode: (currentQuestion as any).executionMode || 'FULL_PROGRAM',
-        functionContract: (currentQuestion as any).functionContract || null,
-      });
+    if (id && currentQuestion) {
+      const qMode = (currentQuestion as any).executionMode || 'FULL_PROGRAM';
+        const qContract = (currentQuestion as any).functionContract || null;
+        const qLang = ((currentQuestion as any).language as SupportedLanguage) || 'javascript';
+        let initialStarter = (currentQuestion as any).starter_code;
+        if (qMode === 'FUNCTION' && qContract?.functionName) {
+          if (!initialStarter || isStaleStarterCode(initialStarter)) {
+            initialStarter = getStarterCode(qLang, 'FUNCTION', qContract);
+          }
+        } else if (!initialStarter) {
+          initialStarter = getStarterCode(qLang, 'FULL_PROGRAM', null);
+        }
+
+        reset({
+          title: (currentQuestion as any).title ?? '',
+          description: (currentQuestion as any).description ?? (currentQuestion as any).text ?? '',
+          difficulty: (currentQuestion as any).difficulty ?? 3,
+          points: (currentQuestion as any).points ?? 50,
+          estimated_time: currentQuestion.estimated_time_seconds
+            ? new Date(currentQuestion.estimated_time_seconds * 1000).toISOString().substring(11, 16)
+            : '00:15',
+          language: qLang,
+          starter_code: initialStarter,
+          test_cases: (currentQuestion as any).test_cases?.length
+            ? (currentQuestion as any).test_cases.map((tc: any, idx: number) => ({
+                id: tc.id ?? `tc-${idx}`,
+                title: tc.title ?? `Test Case ${idx + 1}`,
+                input: tc.input ?? '',
+                expected_output: tc.expected_output ?? tc.expectedOutput ?? '',
+                is_hidden: tc.is_hidden ?? tc.isHidden ?? false,
+              }))
+            : [{ id: 'tc-1', title: 'Test Case 1', input: '', expected_output: '', is_hidden: false }],
+          executionMode: qMode,
+          functionContract: qContract,
+        });
     }
   }, [id, currentQuestion, reset]);
 
@@ -169,10 +158,17 @@ export const CodingEditor: React.FC = () => {
     const [hh, mm] = data.estimated_time.split(':').map(Number);
     const estimated_time_seconds = (hh * 3600) + (mm * 60);
 
+    let finalStarterCode = starterCode;
+    if (data.executionMode === 'FUNCTION' && data.functionContract?.functionName) {
+      if (!finalStarterCode || isStaleStarterCode(finalStarterCode)) {
+        finalStarterCode = getStarterCode(selectedLanguage, 'FUNCTION', data.functionContract);
+      }
+    }
+
     const payload = {
       ...data,
       language: selectedLanguage,
-      starter_code: starterCode,
+      starter_code: finalStarterCode,
       question_type: 'coding' as const,
       estimated_time_seconds,
       executionMode: data.executionMode,
@@ -273,6 +269,9 @@ export const CodingEditor: React.FC = () => {
                   onChange={() => {
                     setValue('executionMode', 'FULL_PROGRAM');
                     setValue('functionContract', null as any);
+                    if (isStaleStarterCode(starterCode) || (functionContract?.functionName && starterCode?.includes(functionContract.functionName))) {
+                      setValue('starter_code', getStarterCode(selectedLanguage, 'FULL_PROGRAM', null));
+                    }
                   }}
                 />
                 <div className="execution-mode-indicator">
@@ -298,8 +297,12 @@ export const CodingEditor: React.FC = () => {
                   {...register('executionMode')}
                   onChange={() => {
                     setValue('executionMode', 'FUNCTION');
+                    const contract = watch('functionContract') || { functionName: '', parameters: [], returnType: 'int' };
                     if (!watch('functionContract')) {
-                      setValue('functionContract', { functionName: '', parameters: [], returnType: 'int' } as any);
+                      setValue('functionContract', contract as any);
+                    }
+                    if (isStaleStarterCode(starterCode)) {
+                      setValue('starter_code', getStarterCode(selectedLanguage, 'FUNCTION', contract));
                     }
                   }}
                 />
