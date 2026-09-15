@@ -45,10 +45,10 @@ function* handleFetchBankQuestions(action: PayloadAction<{ search?: string; type
   }
 }
 
-function* handleUpdateAssessmentQuestions(action: PayloadAction<{ id: string; questionIds: string[] }>): Generator<any, void, any> {
+function* handleUpdateAssessmentQuestions(action: PayloadAction<{ id: string; questions: { id: string; points: number }[] }>): Generator<any, void, any> {
   try {
-    const { id, questionIds } = action.payload;
-    yield call(assessmentService.updateQuestions, id, questionIds);
+    const { id, questions } = action.payload;
+    yield call(assessmentService.updateQuestions, id, questions);
     yield put(updateAssessmentQuestionsSuccess());
   } catch (error: any) {
     const message = error.response?.data?.message || error.message || 'Failed to update test questions';

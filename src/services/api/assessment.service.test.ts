@@ -29,7 +29,7 @@ describe('assessment.service', () => {
 
     const result = await assessmentService.getAll();
     
-    expect(apiClient.get).toHaveBeenCalledWith('/assessments');
+    expect(apiClient.get).toHaveBeenCalledWith('/assessments', { params: undefined });
     expect(result).toEqual(mockData);
   });
 
@@ -57,14 +57,17 @@ describe('assessment.service', () => {
   it('updateQuestions calls PUT /assessments/:id', async () => {
     (apiClient.put as any).mockResolvedValue({ data: { id: '1' } });
     
-    const result = await assessmentService.updateQuestions('1', ['q1', 'q2']);
+    const result = await assessmentService.updateQuestions('1', [
+      { id: 'q1', points: 10 },
+      { id: 'q2', points: 20 }
+    ]);
     
     expect(apiClient.put).toHaveBeenCalledWith('/assessments/1', { 
       questions: [
         { questionId: 'q1', orderIdx: 0, points: 10 },
-        { questionId: 'q2', orderIdx: 1, points: 10 }
+        { questionId: 'q2', orderIdx: 1, points: 20 }
       ]
     });
-    expect(result).toEqual({ data: { id: '1' } });
+    expect(result).toEqual({ id: '1' });
   });
 });

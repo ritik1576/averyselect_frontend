@@ -48,10 +48,18 @@ export const CodingEditor: React.FC = () => {
     handleSubmit,
     watch,
     setValue,
+    getValues,
+    unregister,
     reset,
     formState: { errors },
   } = useForm<CodingFormValues>({
-    resolver: zodResolver(createCodingSchema) as any,
+    resolver: async (values, context, options) => {
+      const payload = { ...values };
+      if (payload.executionMode === 'FULL_PROGRAM') {
+        payload.functionContract = null as any;
+      }
+      return zodResolver(createCodingSchema)(payload, context, options) as any;
+    },
     defaultValues: {
       title: '',
       description: '',
@@ -193,6 +201,9 @@ export const CodingEditor: React.FC = () => {
 
   return (
     <form className="page-question-editor" onSubmit={handleSubmit(onSubmit, (errs) => {
+      console.log('--- FORM VALIDATION FAILED ---');
+      console.log('Errors:', errs);
+      console.log('Form Values (getValues):', getValues());
       const firstErrorKey = Object.keys(errs)[0];
       if (firstErrorKey) {
         const error = errs[firstErrorKey as keyof CodingFormValues];
@@ -268,7 +279,7 @@ export const CodingEditor: React.FC = () => {
                   {...register('executionMode')}
                   onChange={() => {
                     setValue('executionMode', 'FULL_PROGRAM');
-                    setValue('functionContract', null as any);
+                    unregister('functionContract');
                     if (isStaleStarterCode(starterCode) || (functionContract?.functionName && starterCode?.includes(functionContract.functionName))) {
                       setValue('starter_code', getStarterCode(selectedLanguage, 'FULL_PROGRAM', null));
                     }

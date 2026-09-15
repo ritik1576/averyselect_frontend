@@ -163,7 +163,7 @@ const assessmentSlice = createSlice({
       state.bankQuestions = state.bankQuestions.filter((bq) => !selectedIds.has(bq.id));
       state.hasUnsavedChanges = false;
     },
-    updateAssessmentQuestionsRequest(state, _action: PayloadAction<{ id: string; questionIds: string[] }>) {
+    updateAssessmentQuestionsRequest(state, _action: PayloadAction<{ id: string; questions: { id: string; points: number }[] }>) {
       state.loading = true;
       state.error = null;
     },

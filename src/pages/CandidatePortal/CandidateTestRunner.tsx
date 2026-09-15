@@ -653,13 +653,30 @@ export const CandidateTestRunner: React.FC = () => {
             <div className="tr-left-pane">
               <div className="tr-q-meta">
                 <span className="tr-tag-domain">
-                  {currentQ.type === 'code' ? 'Coding Exercise' : 
-                   currentQ.type === 'mcq' ? 'Multiple Choice' : 'Free Text'}
+                  {currentQ.type === 'code'
+                    ? currentQ.executionMode === 'FUNCTION' ? 'Function Challenge' : 'Coding Exercise'
+                    : currentQ.type === 'mcq' ? 'Multiple Choice' : 'Free Text'}
                 </span>
                 <span className="tr-tag-pts">+{currentQ.points} pts</span>
               </div>
 
               <h1 className="tr-q-title">{currentIdx + 1}. {currentQ.title}</h1>
+
+              {/* Function signature banner — only shown for FUNCTION mode questions */}
+              {currentQ.type === 'code' && currentQ.executionMode === 'FUNCTION' && currentQ.functionContract?.functionName && (() => {
+                const fc = currentQ.functionContract;
+                const params = (fc.parameters || []).map((p: any) => `${p.name}: ${p.type}`).join(', ');
+                const signature = `${fc.functionName}(${params}): ${fc.returnType}`;
+                return (
+                  <div className="tr-fn-signature-block">
+                    <span className="tr-fn-signature-label">Function to implement</span>
+                    <code className="tr-fn-signature">{signature}</code>
+                    <p className="tr-fn-signature-hint">
+                      Implement this function in the editor. Do not add <code>main()</code> — the platform handles execution automatically.
+                    </p>
+                  </div>
+                );
+              })()}
 
               <div className="tr-q-desc">
                 <ReactMarkdown>{currentQ.description || ''}</ReactMarkdown>

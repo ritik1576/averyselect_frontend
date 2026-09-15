@@ -22,11 +22,11 @@ export const assessmentService = {
     return response.data;
   },
 
-  updateQuestions: async (assessmentId: string, questionIds: string[]): Promise<{ data: Assessment }> => {
-    const questions = questionIds.map((id, index) => ({
-      questionId: id,
+  updateQuestions: async (assessmentId: string, questionsData: { id: string, points: number }[]): Promise<{ data: Assessment }> => {
+    const questions = questionsData.map((q, index) => ({
+      questionId: q.id,
       orderIdx: index,
-      points: 10,
+      points: q.points ?? 10,
     }));
     const response = await apiClient.put(`/assessments/${assessmentId}`, { questions });
     return response.data;
