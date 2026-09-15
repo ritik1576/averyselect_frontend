@@ -7,11 +7,11 @@ import { useAppSelector } from '../../store/hooks';
 import { publicService } from '../../services/api/public.service';
 import { candidateService } from '../../services/api/candidate.service';
 import { fetchTestPayloadRequest, submitTestRequest } from '../../store/slices/sessionSlice';
+import { getStarterCode, isStaleStarterCode } from '../../utils/starterCode';
 
 const Editor = React.lazy(() => import('@monaco-editor/react'));
 import ReactMarkdown from 'react-markdown';
 import { motion, AnimatePresence } from 'framer-motion';
-import { executeCode } from '../../services/codeExecution';
 import './CandidateTestRunner.css';
 
 interface TestCaseResult {
@@ -42,22 +42,22 @@ const LANGUAGE_TEMPLATES: Record<string, { label: string; monacoLang: string; st
   javascript: {
     label: 'JavaScript (Node.js v20)',
     monacoLang: 'javascript',
-    starter: `function getIntersection(arr1, arr2) {\n  return [...new Set(arr1.filter(x => arr2.includes(x)))];\n}\n\nconsole.log(JSON.stringify(getIntersection([1, 2, 2, 1], [2, 2])));`,
+    starter: `/**\n * Write your solution here.\n * You may define helper functions if needed.\n */\nfunction solution(input) {\n  return input;\n}\n\nmodule.exports = solution;`,
   },
   python: {
     label: 'Python (v3.12)',
     monacoLang: 'python',
-    starter: `def get_intersection(arr1, arr2):\n    return list(set(arr1) & set(arr2))\n\nprint(get_intersection([1, 2, 2, 1], [2, 2]))`,
+    starter: `# Write your solution here.\n# You may define helper functions if needed.\ndef solution(input):\n    return input\n`,
   },
   cpp: {
     label: 'C++ (GCC v14.1)',
     monacoLang: 'cpp',
-    starter: `#include <iostream>\n#include <vector>\n\nint main() {\n    std::cout << "[2]" << std::endl;\n    return 0;\n}`,
+    starter: `#include <iostream>\n#include <vector>\n#include <string>\n#include <algorithm>\n#include <map>\n#include <set>\n#include <unordered_map>\n#include <unordered_set>\nusing namespace std;\n\n// Write your solution here.\n// You may define helper functions above.\nstring solution(string input) {\n    return input;\n}`,
   },
   java: {
     label: 'Java (JDK v17)',
     monacoLang: 'java',
-    starter: `public class Main {\n    public static void main(String[] args) {\n        System.out.println("[2]");\n    }\n}`,
+    starter: `import java.util.*;\n\npublic class Solution {\n    // Write your solution here.\n    // You may define helper functions.\n    public static Object solution(Object input) {\n        return input;\n    }\n}`,
   },
   sql: {
     label: 'SQL (SQLite 3)',
@@ -71,7 +71,7 @@ export const CandidateTestRunner: React.FC = () => {
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { testPayload } = useAppSelector((state) => state.session);
+  const { testPayload, loading: sessionLoading, error: sessionError } = useAppSelector((state) => state.session);
 
   useEffect(() => {
     if (token) {
@@ -115,6 +115,10 @@ export const CandidateTestRunner: React.FC = () => {
   const [isTimeExpiredModalOpen, setIsTimeExpiredModalOpen] = useState(false);
   const [isGridModalOpen, setIsGridModalOpen] = useState(false);
 
+  // Tracks whether we are in a timer-triggered auto-submit flow.
+  // Used by the post-submit useEffect to drive navigation on success/failure.
+  const isAutoSubmittingRef = useRef<boolean>(false);
+
   // Network & Camera Edge Case State
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const [cameraStatus, setCameraStatus] = useState<'active' | 'denied' | 'unavailable'>('active');
@@ -145,7 +149,34 @@ export const CandidateTestRunner: React.FC = () => {
   const currentLangKey = selectedLanguages[currentQ?.id] || 'javascript';
   const currentLangConfig = LANGUAGE_TEMPLATES[currentLangKey] || LANGUAGE_TEMPLATES.javascript;
   const currentQLang = currentQ?.languages?.find((l: any) => l.languageName.toLowerCase() === currentLangKey.toLowerCase());
-  const defaultStarterCode = currentQLang?.starterCode ?? currentLangConfig.starter;
+  
+  const defaultStarterCode = React.useMemo(() => {
+    if (!currentQ) return '';
+    const mode = currentQ.executionMode || 'FULL_PROGRAM';
+    const contract = currentQ.functionContract;
+    if (mode === 'FUNCTION' && contract?.functionName) {
+      if (currentQLang?.starterCode && !isStaleStarterCode(currentQLang.starterCode)) {
+        return currentQLang.starterCode;
+      }
+      return getStarterCode(currentLangKey, 'FUNCTION', contract);
+    }
+    return currentQLang?.starterCode ?? currentLangConfig.starter;
+  }, [currentQ, currentLangKey, currentQLang, currentLangConfig]);
+
+  const currentAnswer = answers[currentQ?.id];
+  const editorCode = React.useMemo(() => {
+    if (currentAnswer !== undefined && currentAnswer !== null) {
+      if (
+        currentQ?.executionMode === 'FUNCTION' &&
+        currentQ?.functionContract?.functionName &&
+        isStaleStarterCode(currentAnswer)
+      ) {
+        return defaultStarterCode;
+      }
+      return currentAnswer;
+    }
+    return defaultStarterCode;
+  }, [currentAnswer, currentQ, defaultStarterCode]);
 
   // Fullscreen Request Handler (Triggers on User Gesture)
   const handleEnterFullscreen = () => {
@@ -334,26 +365,57 @@ export const CandidateTestRunner: React.FC = () => {
     localStorage.setItem(STORAGE_KEY_TIMER, secondsLeft.toString());
   }, [secondsLeft, STORAGE_KEY_TIMER]);
 
+
+  // Observer: fires when sessionLoading transitions false after auto-submit.
+  // If the submit succeeded, navigate to /submitted.
+  // If it failed, clear the auto-submit flag so the expiry modal stays visible
+  // and the candidate can see the error (toast is shown by the saga).
+  useEffect(() => {
+    if (!isAutoSubmittingRef.current) return;
+    if (sessionLoading) return; // still in flight
+    // Loading just went false — submission has resolved
+    if (!sessionError) {
+      // Success — navigate
+      isAutoSubmittingRef.current = false;
+      localStorage.removeItem(STORAGE_KEY_ANSWERS);
+      localStorage.removeItem(STORAGE_KEY_TIMER);
+      navigate(`/take/${token || 'demo'}/submitted`);
+    } else {
+      // Failure — remain on expiry modal, let the saga toast show the error
+      isAutoSubmittingRef.current = false;
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sessionLoading, sessionError]);
+
   // Timer Countdown with 00:00 Auto-Submit Edge Case
   useEffect(() => {
     const timer = setInterval(() => {
       setSecondsLeft((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
-          // Auto submit when time expires
+          // Show the expiry modal then trigger the authoritative submission flow.
+          // Navigation happens in the post-submit observer useEffect (above) once
+          // the saga signals success. On failure the modal stays up and the saga
+          // toast informs the candidate.
           setIsTimeExpiredModalOpen(true);
+          // Use a short delay so the modal renders before the network work starts.
           setTimeout(() => {
-            localStorage.removeItem(STORAGE_KEY_ANSWERS);
-            localStorage.removeItem(STORAGE_KEY_TIMER);
-            navigate(`/take/${token || 'demo'}/submitted`);
-          }, 2500);
+            // Capture current in-memory answers (fresher than localStorage).
+            // answersRef is read inside setSecondsLeft's closure, but answers/selectedLanguages
+            // are captured via the dependency array below.
+            isAutoSubmittingRef.current = true;
+            dispatch(submitTestRequest({ answers, selectedLanguages }));
+          }, 500);
           return 0;
         }
         return prev - 1;
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, [navigate, token, STORAGE_KEY_ANSWERS, STORAGE_KEY_TIMER]);
+  // answers and selectedLanguages are intentionally included so the closure
+  // captures the latest values at expiry time.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [navigate, token, STORAGE_KEY_ANSWERS, STORAGE_KEY_TIMER, dispatch, answers, selectedLanguages]);
 
   const formatTimer = (secs: number) => {
     const m = Math.floor(secs / 60);
@@ -387,46 +449,25 @@ export const CandidateTestRunner: React.FC = () => {
     setAnswers((prev) => ({ ...prev, [currentQ.id]: text }));
   };
 
-  /**
-   * Converts test case input (which may be JSON like "[10, 5, 20, 8]" or '"hello"' or "42")
-   * into stdin that C++/Java competitive-programming style code can read via cin/Scanner.
-   *
-   * Conversion rules:
-   *  - Array of numbers/booleans → first line: count, second line: space-separated values
-   *  - Array of strings          → first line: count, then one string per line
-   *  - Plain string              → the string value itself (no quotes)
-   *  - Plain number/boolean      → string representation
-   *  - Raw text (not JSON)       → passed as-is
-   */
-  const normalizeStdinForNative = (input: string): string => {
-    const raw = (input ?? '').trim();
-    try {
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) {
-        const count = parsed.length;
-        const isStringArray = parsed.every((x) => typeof x === 'string');
-        if (isStringArray) {
-          // e.g. ["hello", "world"] → "2\nhello\nworld"
-          return `${count}\n${parsed.join('\n')}`;
-        } else {
-          // e.g. [10, 5, 20, 8] → "4\n10 5 20 8"
-          return `${count}\n${parsed.join(' ')}`;
-        }
-      } else if (typeof parsed === 'string') {
-        return parsed; // Strip surrounding quotes
-      } else {
-        return String(parsed);
-      }
-    } catch {
-      return raw; // Already plain text, pass through
-    }
-  };
 
   const handleLanguageChange = (langKey: string) => {
     setSelectedLanguages((prev) => ({ ...prev, [currentQ.id]: langKey }));
-    // Reset code answer to starter template for new language if not edited
-    const qLang = currentQ?.languages?.find((l: any) => l.languageName.toLowerCase() === langKey.toLowerCase());
-    const newTemplate = qLang?.starterCode ?? LANGUAGE_TEMPLATES[langKey]?.starter ?? '';
+    const mode = currentQ?.executionMode || 'FULL_PROGRAM';
+    const contract = currentQ?.functionContract;
+    let newTemplate = '';
+
+    if (mode === 'FUNCTION' && contract?.functionName) {
+      const qLang = currentQ?.languages?.find((l: any) => l.languageName.toLowerCase() === langKey.toLowerCase());
+      if (qLang?.starterCode && !isStaleStarterCode(qLang.starterCode)) {
+        newTemplate = qLang.starterCode;
+      } else {
+        newTemplate = getStarterCode(langKey, 'FUNCTION', contract);
+      }
+    } else {
+      const qLang = currentQ?.languages?.find((l: any) => l.languageName.toLowerCase() === langKey.toLowerCase());
+      newTemplate = qLang?.starterCode ?? LANGUAGE_TEMPLATES[langKey]?.starter ?? '';
+    }
+
     setAnswers((prev) => ({ ...prev, [currentQ.id]: newTemplate }));
   };
 
@@ -445,169 +486,71 @@ export const CandidateTestRunner: React.FC = () => {
       },
     }));
 
-    const publicTestCases = (currentQ.testCases || [
-      { id: 1, label: 'Case 1', input: 'Default Input', expectedOutput: 'Successful Execution', isHidden: false }
-    ]).filter((tc: any) => !tc.isHidden);
+    try {
+      // Delegate all execution to the shared backend engine.
+      // The backend securely reads executionMode and functionContract from the DB.
+      const engineResult = await candidateService.runCode(
+        currentQ.id,
+        code,
+        currentLangKey
+      );
 
-    const testCaseResults: TestCaseResult[] = [];
-    let globalExecutionTimeMs = 0;
-    let globalMemoryKb = 0;
-    let firstError: any = null;
+      const testCaseResults: TestCaseResult[] = (engineResult.testCaseResults ?? []).map(
+        (tcr: any, idx: number) => ({
+          testCaseId: tcr.testCaseId,
+          label: `Case ${idx + 1}`,
+          input: (currentQ.testCases ?? []).find((tc: any) => tc.id === tcr.testCaseId)?.input ?? '',
+          expectedOutput: (currentQ.testCases ?? []).find((tc: any) => tc.id === tcr.testCaseId)?.expectedOutput ?? '',
+          actualOutput: tcr.error ? `Error: ${tcr.error}` : (tcr.output ?? '(No output returned)'),
+          passed: !!tcr.passed,
+          isHidden: false,
+          timeMs: tcr.executionTimeMs,
+        })
+      );
 
-    let fnName = 'solution';
-    const pyMatch = code.match(/def\s+([a-zA-Z0-9_]+)\s*\(/);
-    const jsMatch = code.match(/(?:function\s+([a-zA-Z0-9_]+)\s*\()|(?:(?:const|let|var)\s+([a-zA-Z0-9_]+)\s*=\s*(?:function|\(.*=>|.*=>))/);
-    if (currentLangKey === 'python' && pyMatch) {
-      fnName = pyMatch[1];
-    } else if (jsMatch) {
-      fnName = jsMatch[1] || jsMatch[2] || 'solution';
-    }
+      const passCount = engineResult.passCount ?? 0;
+      const totalCount = engineResult.totalCount ?? testCaseResults.length;
+      const allPassed = engineResult.status === 'PASSED';
+      const hasError = engineResult.status === 'ERROR';
 
-    for (const tc of publicTestCases) {
-      let wrappedCode = '';
-      let stdinPayload = '';
-
-      if (currentLangKey === 'cpp' || currentLangKey === 'java') {
-        wrappedCode = code; // No wrapper, candidate reads from stdin
-        stdinPayload = normalizeStdinForNative(tc.input);
-      } else if (currentLangKey === 'python') {
-        wrappedCode = `
-${code}
-import sys
-import json
-try:
-  fn_name = '${fnName}'
-  fn = locals().get(fn_name)
-  if fn and callable(fn):
-      args = (${tc.input},)
-      result = fn(*args)
-      print("\\n---AGY_RESULT_DELIM---\\n" + json.dumps(result), end='')
-  else:
-      pass
-except Exception as e:
-  print(e)
-`;
-      } else {
-        wrappedCode = `
-${code}
-try {
-  let __fn = null;
-  if (typeof module !== 'undefined' && typeof module.exports === 'function') {
-    __fn = module.exports;
-  } else if (typeof ${fnName} === 'function') {
-    __fn = ${fnName};
-  }
-  
-  if (__fn) {
-    let args = [ ${tc.input} ];
-    const result = __fn(...args);
-    if (result !== undefined) {
-      process.stdout.write("\\n---AGY_RESULT_DELIM---\\n" + JSON.stringify(result));
-    }
-  } else {
-    // If no function, assume they are just printing or we gracefully ignore
-  }
-} catch (e) {
-  process.stdout.write(e.toString());
-}
-`;
-      }
-
-      const result = await executeCode(currentLangKey, wrappedCode, stdinPayload);
-      globalExecutionTimeMs += (result.executionTimeMs || 0);
-      globalMemoryKb = Math.max(globalMemoryKb, result.memoryKb || 0);
-
-      if (result.exitCode !== 0 && !firstError) {
-         firstError = result;
-      }
-
-      let rawStdout = (result.stdout || '').trim();
-      let cleanStdout = rawStdout;
-      let consoleLogs = '';
-      if (rawStdout.includes('---AGY_RESULT_DELIM---')) {
-         const parts = rawStdout.split('---AGY_RESULT_DELIM---');
-         consoleLogs = parts[0].trim();
-         cleanStdout = parts[1].trim();
-      }
-
-      const normalizeOutput = (s: string) =>
-        s.trim().split('\n').map(l => l.trim()).filter(l => l !== '').join('\n');
-
-      const expectedClean = normalizeOutput(tc.expectedOutput);
-      const actualClean = normalizeOutput(cleanStdout);
-
-      let expectedObj, actualObj;
-      try { expectedObj = JSON.parse(expectedClean); } catch(e) { expectedObj = expectedClean; }
-      try { actualObj = JSON.parse(actualClean); } catch(e) { actualObj = actualClean; }
-      
-      const isMatch = JSON.stringify(expectedObj) === JSON.stringify(actualObj);
-      // For C++/Java: stderr may contain JVM/compiler warnings even on success.
-      // Only consider it a hard failure if exitCode != 0 (compile/runtime error).
-      const hasHardError = result.exitCode !== 0;
-      const isPassed = !hasHardError && isMatch;
-      
-      const finalOutput = consoleLogs ? `Logs:\n${consoleLogs}\n\nResult:\n${cleanStdout}` : cleanStdout;
-
-      testCaseResults.push({
-        testCaseId: tc.id,
-        label: tc.label || `Case ${publicTestCases.indexOf(tc) + 1}`,
-        input: tc.input,
-        expectedOutput: tc.expectedOutput,
-        actualOutput: hasHardError ? `Error: ${result.stderr.trim()}` : (finalOutput || '(No output returned)'),
-        passed: isPassed,
-        isHidden: false,
-        timeMs: result.executionTimeMs,
-      });
-    }
-
-    setIsExecuting(false);
-
-    if (firstError && testCaseResults.length === 0) {
-      // Compilation or Syntax error before any test case
+      setCodeOutputs((prev) => ({
+        ...prev,
+        [currentQ.id]: {
+          status: allPassed ? 'passed' : 'failed',
+          statusText: hasError
+            ? `Execution Error`
+            : `${passCount}/${totalCount} test cases passed`,
+          output: engineResult.output ?? '',
+          stderr: engineResult.fatalError ?? undefined,
+          language: currentLangConfig.label,
+          timeMs: engineResult.executionTimeMs,
+          testCaseResults,
+          passCount,
+          totalCount,
+        },
+      }));
+    } catch (err: any) {
       setCodeOutputs((prev) => ({
         ...prev,
         [currentQ.id]: {
           status: 'failed',
-          statusText: firstError.statusDescription || 'Compile Error',
-          output: '',
-          stderr: firstError.stderr || firstError.output,
-          timeMs: firstError.executionTimeMs,
-          language: firstError.language,
+          statusText: 'Network or server error',
+          output: err?.response?.data?.message || err?.message || 'Unknown error',
+          language: currentLangConfig.label,
         },
       }));
-      return;
-    }
-
-    const passedCount = testCaseResults.filter((r) => r.passed).length;
-    const allPassed = passedCount === publicTestCases.length;
-
-    setCodeOutputs((prev) => ({
-      ...prev,
-      [currentQ.id]: {
-        status: allPassed ? 'passed' : 'failed',
-        statusText: allPassed ? `Passed ${passedCount}/${publicTestCases.length} Public Test Cases` : `${passedCount}/${publicTestCases.length} Public Test Cases Passed`,
-        output: 'Code executed successfully.',
-        timeMs: globalExecutionTimeMs,
-        memoryKb: globalMemoryKb,
-        language: currentLangConfig.label,
-        testCaseResults,
-        passCount: passedCount,
-        totalCount: publicTestCases.length,
-      },
-    }));
-
-    if (publicTestCases.length > 0) {
-      setActiveTestCaseTab((prev) => ({ ...prev, [currentQ.id]: publicTestCases[0].id }));
+    } finally {
+      setIsExecuting(false);
     }
   };
 
-  // We need an effect to navigate when submit succeeds, but we will leave that for later or rely on the sagas showing a toast and manual navigation. Wait, the saga dispatches submitTestSuccess. Let's add a useSelector to listen to submit success!
-  // Oh, actually we just navigate to /submitted for now for MVP.
+  // (Legacy useEffect placeholder — kept for structural integrity)
   useEffect(() => {
     // If we wanted to, we could track submit success here and then navigate.
     // For now we'll just navigate immediately to avoid the user getting stuck if it's slow.
     // Wait, the original code had navigate immediately. Let's keep it but put it inside the function.
   }, []);
+
 
   const handleSubmitFinal = () => {
     setIsSubmitModalOpen(false);
@@ -710,13 +653,30 @@ try {
             <div className="tr-left-pane">
               <div className="tr-q-meta">
                 <span className="tr-tag-domain">
-                  {currentQ.type === 'code' ? 'Coding Exercise' : 
-                   currentQ.type === 'mcq' ? 'Multiple Choice' : 'Free Text'}
+                  {currentQ.type === 'code'
+                    ? currentQ.executionMode === 'FUNCTION' ? 'Function Challenge' : 'Coding Exercise'
+                    : currentQ.type === 'mcq' ? 'Multiple Choice' : 'Free Text'}
                 </span>
                 <span className="tr-tag-pts">+{currentQ.points} pts</span>
               </div>
 
               <h1 className="tr-q-title">{currentIdx + 1}. {currentQ.title}</h1>
+
+              {/* Function signature banner — only shown for FUNCTION mode questions */}
+              {currentQ.type === 'code' && currentQ.executionMode === 'FUNCTION' && currentQ.functionContract?.functionName && (() => {
+                const fc = currentQ.functionContract;
+                const params = (fc.parameters || []).map((p: any) => `${p.name}: ${p.type}`).join(', ');
+                const signature = `${fc.functionName}(${params}): ${fc.returnType}`;
+                return (
+                  <div className="tr-fn-signature-block">
+                    <span className="tr-fn-signature-label">Function to implement</span>
+                    <code className="tr-fn-signature">{signature}</code>
+                    <p className="tr-fn-signature-hint">
+                      Implement this function in the editor. Do not add <code>main()</code> — the platform handles execution automatically.
+                    </p>
+                  </div>
+                );
+              })()}
 
               <div className="tr-q-desc">
                 <ReactMarkdown>{currentQ.description || ''}</ReactMarkdown>
@@ -778,7 +738,7 @@ try {
                     height="380px"
                     language={currentLangConfig.monacoLang}
                     theme="vs-dark"
-                    value={answers[currentQ.id] ?? defaultStarterCode}
+                    value={editorCode}
                     onChange={handleCodeChange}
                     options={{ 
                       fontSize: 14, 

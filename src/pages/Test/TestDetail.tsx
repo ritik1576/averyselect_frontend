@@ -124,7 +124,7 @@ export const TestDetail: React.FC = () => {
     dispatch(
       updateAssessmentQuestionsRequest({
         id,
-        questionIds: selectedQuestions.map((q) => q.id),
+        questions: selectedQuestions.map((q) => ({ id: q.id, points: q.points })),
       })
     );
   };

@@ -34,7 +34,9 @@ export const questionService = {
         ...q,
         question_type: mapBackendToFrontendType(q.type || q.question_type),
         description: q.text || q.description,
-        estimated_time_seconds: q.estimatedTimeSeconds || q.estimated_time_seconds
+        estimated_time_seconds: q.estimatedTimeSeconds || q.estimated_time_seconds,
+        language: q.questionLanguages?.[0]?.language?.name || 'javascript',
+        starter_code: q.questionLanguages?.[0]?.starterCode || '',
       }));
     }
     return response.data;

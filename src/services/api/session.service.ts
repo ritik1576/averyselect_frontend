@@ -81,9 +81,9 @@ export const sessionService = {
       const qResult = sessionData?.result?.questionResults?.find((qr: any) => qr.questionId === q.id);
       
       const score = qResult?.score || 0;
-      // IMPORTANT: Always use Question.points as authoritative maxScore.
-      // QuestionResult.maxScore was set by auto-grader which uses hardcoded 10 — NOT the real question points.
-      const maxScore = q.points || qResult?.maxScore || 0;
+      // IMPORTANT: Use the historical graded QuestionResult.maxScore if available.
+      // For unanswered questions, fallback to the assessment-specific AssessmentQuestion.points.
+      const maxScore = qResult?.maxScore ?? aq.points ?? 0;
       const isCorrect = qResult?.isCorrect ?? (score > 0 && score >= maxScore);
       const timeTakenStr = attempt.timeSpentMs ? formatTime(attempt.timeSpentMs) : '00:00';
 

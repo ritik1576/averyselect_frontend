@@ -74,4 +74,12 @@ export const candidateService = {
     const response = await publicApiClient.post('/public/sessions/events', { eventType, details });
     return response.data;
   },
+
+  runCode: async (questionId: string, code: string, language: string) => {
+    const response = await publicApiClient.post(`/public/sessions/questions/${questionId}/run`, {
+      code,
+      language,
+    });
+    return response.data.data;
+  }
 };
