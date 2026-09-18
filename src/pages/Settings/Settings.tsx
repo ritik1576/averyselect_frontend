@@ -130,7 +130,7 @@ export const Settings: React.FC = () => {
                 <div className="detail-text">
                   <label>Company</label>
                   <span style={{ color: 'var(--color-neutral-400)' }}>
-                    {user?.companyName || user?.company_name || 'AverySelect'}
+                    {user?.company?.name || user?.companyName || user?.company_name || 'AverySelect'}
                   </span>
                 </div>
               </div>

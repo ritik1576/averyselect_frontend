@@ -44,7 +44,6 @@ function* handleFetchQuestionById(action: PayloadAction<string>): Generator<any,
   } catch (error: any) {
     const message = error.response?.data?.message || error.message || 'Failed to fetch question details';
     yield put(fetchQuestionByIdFailure(message));
-    toast.error(message);
   }
 }
 
@@ -59,7 +58,6 @@ function* handleUpdateQuestion(action: PayloadAction<{ id: string; data: any; on
   } catch (error: any) {
     const message = error.response?.data?.message || error.message || 'Failed to update question';
     yield put(updateQuestionFailure(message));
-    toast.error(message);
   }
 }
 
@@ -74,7 +72,6 @@ function* handleDeleteQuestion(action: PayloadAction<{ id: string; onSuccess?: (
   } catch (error: any) {
     const message = error.response?.data?.message || error.message || 'Failed to delete question';
     yield put(deleteQuestionFailure(message));
-    toast.error(message);
   }
 }
 
