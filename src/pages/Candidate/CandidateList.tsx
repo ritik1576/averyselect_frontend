@@ -323,13 +323,31 @@ export const CandidateList: React.FC = () => {
           </thead>
           <tbody>
             {loading ? (
-              <tr className="cl-empty-row">
-                <td colSpan={4}>
-                  <div className="cl-empty-state">
-                    <div className="cl-empty-title">Loading candidates...</div>
-                  </div>
-                </td>
-              </tr>
+              [...Array(5)].map((_, i) => (
+                <tr key={i} className="cl-table-row cl-skeleton-row">
+                  <td>
+                    <div className="skeleton-box skeleton-box--title"></div>
+                    <div className="skeleton-box skeleton-box--date"></div>
+                  </td>
+                  <td>
+                    <div className="cl-candidate-cell">
+                      <div className="skeleton-box skeleton-box--avatar"></div>
+                      <div className="cl-candidate-info">
+                        <div className="skeleton-box skeleton-box--name"></div>
+                        <div className="skeleton-box skeleton-box--email"></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div className="cl-date-cell">
+                      <div className="skeleton-box skeleton-box--date"></div>
+                    </div>
+                  </td>
+                  <td className="cl-col-right">
+                    <div className="skeleton-box skeleton-box--score"></div>
+                  </td>
+                </tr>
+              ))
             ) : paginated.length === 0 ? (
               <tr className="cl-empty-row">
                 <td colSpan={4}>

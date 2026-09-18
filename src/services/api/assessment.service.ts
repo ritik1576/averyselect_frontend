@@ -45,5 +45,26 @@ export const assessmentService = {
   createLink: async (id: string): Promise<{ data: any }> => {
     const response = await apiClient.post(`/assessments/${id}/links`);
     return response.data;
-  }
+  },
+
+  inviteCandidates: async (
+    assessmentId: string,
+    candidates: { name?: string; email: string }[]
+  ): Promise<{ success: boolean; data: any[]; message: string }> => {
+    const response = await apiClient.post(`/assessments/${assessmentId}/invites`, { candidates });
+    return response.data;
+  },
+
+  getInvites: async (assessmentId: string, options?: { page?: number; limit?: number; search?: string }): Promise<{ success: boolean; data: any[]; meta?: any }> => {
+    const response = await apiClient.get(`/assessments/${assessmentId}/invites`, { params: options });
+    return response.data;
+  },
+
+  resendInvite: async (
+    assessmentId: string,
+    inviteId: string
+  ): Promise<{ success: boolean; data: any; message: string }> => {
+    const response = await apiClient.post(`/assessments/${assessmentId}/invites/${inviteId}/resend`);
+    return response.data;
+  },
 };

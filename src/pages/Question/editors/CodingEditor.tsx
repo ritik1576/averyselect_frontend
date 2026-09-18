@@ -58,7 +58,7 @@ export const CodingEditor: React.FC = () => {
       if (payload.executionMode === 'FULL_PROGRAM') {
         payload.functionContract = null as any;
       }
-      return zodResolver(createCodingSchema)(payload, context, options) as any;
+      return zodResolver(createCodingSchema)(payload, context, options as any) as any;
     },
     defaultValues: {
       title: '',
@@ -147,13 +147,13 @@ export const CodingEditor: React.FC = () => {
             : '00:15',
           language: qLang,
           starter_code: initialStarter,
-          test_cases: (currentQuestion as any).test_cases?.length
-            ? (currentQuestion as any).test_cases.map((tc: any, idx: number) => ({
+          test_cases: ((currentQuestion as any).testCases || (currentQuestion as any).test_cases)?.length
+            ? ((currentQuestion as any).testCases || (currentQuestion as any).test_cases).map((tc: any, idx: number) => ({
                 id: tc.id ?? `tc-${idx}`,
-                title: tc.title ?? `Test Case ${idx + 1}`,
-                input: tc.input ?? '',
-                expected_output: tc.expected_output ?? tc.expectedOutput ?? '',
-                is_hidden: tc.is_hidden ?? tc.isHidden ?? false,
+                title: tc.title || `Test Case ${idx + 1}`,
+                input: tc.input || '',
+                expected_output: tc.expectedOutput || tc.expected_output || '',
+                is_hidden: tc.isHidden ?? tc.is_hidden ?? false,
               }))
             : [{ id: 'tc-1', title: 'Test Case 1', input: '', expected_output: '', is_hidden: false }],
           executionMode: qMode,
@@ -227,7 +227,7 @@ export const CodingEditor: React.FC = () => {
           <ArrowLeft size={16} />
           <span>Back to Library</span>
         </Link>
-        <div className="editor-top-actions">
+        <div className="editor-actions">
           <Button type="button" variant="outline" onClick={() => navigate('/dashboard/questions')}>Cancel</Button>
           <Button icon={<Save size={16} />} type="submit" variant="primary" disabled={loading} className={loading ? "opacity-50 cursor-not-allowed" : ""}>
             {loading ? 'Saving...' : 'Save Question'}

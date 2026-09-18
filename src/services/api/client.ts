@@ -42,11 +42,17 @@ apiClient.interceptors.response.use(
     }
 
     if (error.response?.status === 401) {
-      // Clear token and redirect to login if unauthorized
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      toast.error('Session expired. Please log in again.');
-      window.location.href = '/login';
+      const isAuthEndpoint = error.config?.url?.includes('/auth/login') || error.config?.url?.includes('/auth/register');
+      
+      if (!isAuthEndpoint) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        
+        if (window.location.pathname !== '/login') {
+          toast.error('Session expired. Please log in again.');
+          window.location.href = '/login';
+        }
+      }
     } else {
       // Clean up technical messages to look world-class
       if (message.includes('Route') && message.includes('not found')) {
