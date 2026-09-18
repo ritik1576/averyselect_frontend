@@ -622,3 +622,28 @@
     border-bottom: none;
   }
 }
+
+/* Skeleton Loader for CandidateList */
+.skeleton-box {
+  background: linear-gradient(90deg, #f0f0f0 25%, #f8f8f8 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeleton-box--title { width: 140px; height: 16px; margin-bottom: 6px; }
+.skeleton-box--date { width: 90px; height: 12px; }
+.skeleton-box--avatar { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; }
+.skeleton-box--name { width: 120px; height: 14px; margin-bottom: 4px; }
+.skeleton-box--email { width: 160px; height: 12px; }
+.skeleton-box--score { width: 60px; height: 20px; float: right; border-radius: 10px; }
+
+.cl-skeleton-row td {
+  padding: 16px;
+  vertical-align: middle;
+}
