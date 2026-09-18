@@ -74,7 +74,7 @@ describe('assessmentSlice reducer', () => {
   });
 
   it('should handle updateAssessmentQuestionsRequest', () => {
-    const actual = assessmentReducer(initialState, updateAssessmentQuestionsRequest({ id: 'test1', questionIds: ['q2'] }));
+    const actual = assessmentReducer(initialState, updateAssessmentQuestionsRequest({ id: 'test1', questions: [{ id: 'q2', points: 10 }] }));
     expect(actual.loading).toBe(true);
     expect(actual.error).toBe(null);
   });

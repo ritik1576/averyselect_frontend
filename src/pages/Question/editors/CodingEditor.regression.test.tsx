@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import React from 'react';
+
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { CodingEditor } from './CodingEditor';
@@ -91,7 +91,7 @@ describe('CodingEditor Regression', () => {
     );
     
     expect(createCall).toBeDefined();
-    const payload = createCall[0].payload.data;
+    const payload = createCall![0].payload.data;
     
     expect(payload.executionMode).toBe('FULL_PROGRAM');
     expect(payload.functionContract).toBeNull();

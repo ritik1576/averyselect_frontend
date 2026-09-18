@@ -58,7 +58,7 @@ export const CodingEditor: React.FC = () => {
       if (payload.executionMode === 'FULL_PROGRAM') {
         payload.functionContract = null as any;
       }
-      return zodResolver(createCodingSchema)(payload, context, options) as any;
+      return zodResolver(createCodingSchema)(payload, context, options as any) as any;
     },
     defaultValues: {
       title: '',
