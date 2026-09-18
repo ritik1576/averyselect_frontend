@@ -941,6 +941,8 @@
 .status-pill--review   { background: var(--color-warning-light); color: var(--color-warning-dark); border-color: var(--color-warning-light); }
 .status-pill--passed   { background: var(--color-success-light); color: var(--color-success-dark); border-color: var(--color-success-light); }
 .status-pill--rejected { background: var(--color-error-light); color: var(--color-error-dark); border-color: var(--color-error-light); }
+.status-pill--sent     { background: #eff6ff; color: #2563eb; border-color: #dbeafe; }
+.status-pill--opened   { background: #faf5ff; color: #7c3aed; border-color: #f3e8ff; }
 
 /* Status dot */
 .status-dot {
@@ -952,6 +954,60 @@
 .status-dot--review   { background-color: var(--color-warning); }
 .status-dot--passed   { background-color: var(--color-success); }
 .status-dot--rejected { background-color: var(--color-error); }
+.status-dot--sent     { background-color: #3b82f6; }
+.status-dot--opened   { background-color: #8b5cf6; }
+
+/* Invitation action button */
+.tc-resend-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #ffffff;
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.tc-resend-btn:hover:not(:disabled) {
+  background: #f8fafc;
+  color: #ef4623;
+  border-color: #ef4623;
+}
+.tc-resend-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.tc-invite-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #ef4623;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(239, 70, 35, 0.15);
+  transition: background-color 0.15s ease;
+}
+.tc-invite-btn:hover {
+  background-color: #d83917;
+}
+
+@keyframes spin-resend {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.tc-spinner {
+  animation: spin-resend 1s linear infinite;
+}
 
 /* Chevron rotation on open */
 .status-chevron {

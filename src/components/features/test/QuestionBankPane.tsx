@@ -5,6 +5,7 @@ import { Info, X, List, Search, Code, AlignLeft, Plus } from 'lucide-react';
 import { useAppSelector, useAppDispatch } from '../../../store/hooks';
 import { fetchBankQuestionsRequest, addQuestionToTest } from '../../../store/slices/assessmentSlice';
 import type { Question } from '../../../types/models';
+import { Button } from '../../ui';
 
 const TYPE_ICON: Record<string, React.ReactNode> = {
   mcq: <List size={14} />,
@@ -135,9 +136,11 @@ export const QuestionBankPane: React.FC<{ onClose?: () => void }> = ({ onClose }
           <div className="bank-empty-state">
             <p>No questions found.</p>
             {searchQuery && (
-              <button className="link-btn" onClick={() => setSearchQuery('')}>
-                Clear search
-              </button>
+              <div style={{ marginTop: '12px' }}>
+                <Button variant="outline" size="sm" onClick={() => setSearchQuery('')}>
+                  Clear search
+                </Button>
+              </div>
             )}
           </div>
         ) : (

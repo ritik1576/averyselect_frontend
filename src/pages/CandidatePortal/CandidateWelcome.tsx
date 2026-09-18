@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useAppSelector } from '../../store/hooks';
 import { startAssessmentRequest } from '../../store/slices/sessionSlice';
@@ -9,14 +9,18 @@ import './CandidateWelcome.css';
 
 export const CandidateWelcome: React.FC = () => {
   const { token } = useParams<{ token: string }>();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   
   // Track success to navigate
   const { loading, error: reduxError } = useAppSelector((state) => state.session);
 
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const initialEmail = searchParams.get('email') || '';
+  const initialName = searchParams.get('name') || '';
+
+  const [name, setName] = useState(initialName);
+  const [email, setEmail] = useState(initialEmail);
   const [phone, setPhone] = useState('');
   const [agreed, setAgreed] = useState(false);
   const [error, setError] = useState('');
@@ -144,6 +148,8 @@ export const CandidateWelcome: React.FC = () => {
               placeholder="e.g. Jane Doe"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              readOnly={!!searchParams.get('name')}
+              className={searchParams.get('name') ? 'cw-input-readonly' : ''}
               required
             />
           </div>
@@ -157,8 +163,15 @@ export const CandidateWelcome: React.FC = () => {
                 placeholder="e.g. jane.doe@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                readOnly={!!searchParams.get('email')}
+                className={searchParams.get('email') ? 'cw-input-readonly' : ''}
                 required
               />
+              {!!searchParams.get('email') && (
+                <span style={{ fontSize: '12px', color: '#64748b', marginTop: '4px', display: 'block' }}>
+                  Email is locked for invited candidates.
+                </span>
+              )}
             </div>
             <div className="cw-field">
               <label htmlFor="cand-phone">Phone Number (Optional)</label>

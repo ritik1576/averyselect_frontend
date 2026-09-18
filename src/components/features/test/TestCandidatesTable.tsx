@@ -1,13 +1,19 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Search, SlidersHorizontal, Info, User, ChevronDown, Check, X, Download } from 'lucide-react';
+import { Search, SlidersHorizontal, Info, User, ChevronDown, Check, X, Download, Mail, RefreshCw } from 'lucide-react';
 import { Pagination, TableSkeleton } from '../../ui';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { sessionService } from '../../../services/api/session.service';
+import { assessmentService } from '../../../services/api/assessment.service';
 import toast from 'react-hot-toast';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type ReviewStatus = 'to_review' | 'passed' | 'rejected';
-type TabKey = 'all' | ReviewStatus;
+type TabKey = 'all' | ReviewStatus | 'invited';
+
+export interface TestCandidatesTableProps {
+  refreshTrigger?: number;
+  onInviteClick?: () => void;
+}
 
 interface Candidate {
   session_id: string;
@@ -35,6 +41,22 @@ const STATUS_CONFIG: Record<ReviewStatus, { label: string; pillClass: string; do
   passed:    { label: 'Passed',    pillClass: 'status-pill--passed',    dotClass: 'status-dot--passed' },
   rejected:  { label: 'Rejected',  pillClass: 'status-pill--rejected',  dotClass: 'status-dot--rejected' },
 };
+
+function getInviteStatusConfig(status: string) {
+  switch (status) {
+    case 'OPENED':
+      return { label: 'Link Opened', pillClass: 'status-pill--opened', dotClass: 'status-dot--opened' };
+    case 'STARTED':
+      return { label: 'In Progress', pillClass: 'status-pill--review', dotClass: 'status-dot--review' };
+    case 'COMPLETED':
+      return { label: 'Completed', pillClass: 'status-pill--passed', dotClass: 'status-dot--passed' };
+    case 'EXPIRED':
+      return { label: 'Expired', pillClass: 'status-pill--rejected', dotClass: 'status-dot--rejected' };
+    case 'SENT':
+    default:
+      return { label: 'Email Sent', pillClass: 'status-pill--sent', dotClass: 'status-dot--sent' };
+  }
+}
 
 // ─── CSV Export ───────────────────────────────────────────────────────────────
 function exportCandidatesCSV(candidates: Candidate[], tabLabel: string) {
@@ -184,12 +206,15 @@ const StatusDropdown: React.FC<StatusDropdownProps> = ({ sessionId, current, onC
 // ─── Main Component ───────────────────────────────────────────────────────────
 const ITEMS_PER_PAGE = 10;
 
-export const TestCandidatesTable: React.FC = () => {
+export const TestCandidatesTable: React.FC<TestCandidatesTableProps> = ({ refreshTrigger, onInviteClick }) => {
   const navigate = useNavigate();
   const { id: assessmentId } = useParams<{ id: string }>();
 
   // ── Server data ──────────────────────────────────────────────────────────────
   const [candidates, setCandidates] = useState<Candidate[]>([]);
+  const [invitations, setInvitations] = useState<any[]>([]);
+  const [totalInvitations, setTotalInvitations] = useState(0);
+  const [resendingId, setResendingId] = useState<string | null>(null);
   const [counts, setCounts] = useState<TabCounts>({ all: 0, to_review: 0, passed: 0, rejected: 0 });
   const [totalPages, setTotalPages] = useState(1);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
@@ -218,6 +243,8 @@ export const TestCandidatesTable: React.FC = () => {
   // ── Fetch (single source of truth) ──────────────────────────────────────────
   const fetchCandidates = useCallback(async () => {
     if (!assessmentId) return;
+    if (activeTab === 'invited') return; // Do not fetch sessions for the invites tab
+    
     setError(null);
     try {
       const res = await sessionService.getAll({
@@ -263,9 +290,50 @@ export const TestCandidatesTable: React.FC = () => {
     }
   }, [assessmentId, activeTab, debouncedSearch, currentPage]);
 
+  const fetchInvitations = useCallback(async () => {
+    if (!assessmentId) return;
+    try {
+      const res = await assessmentService.getInvites(assessmentId, {
+        page: activeTab === 'invited' ? currentPage : 1,
+        limit: activeTab === 'invited' ? ITEMS_PER_PAGE : 1,
+        search: activeTab === 'invited' ? debouncedSearch || undefined : undefined,
+      });
+      
+      console.log('getInvites Response:', res);
+      if (activeTab === 'invited' && res.data) {
+        setInvitations(res.data);
+      }
+      if (res.meta) {
+        console.log('Setting totalPages to:', res.meta.totalPages);
+        if (activeTab === 'invited') setTotalPages(res.meta.totalPages || 1);
+        setTotalInvitations(res.meta.total || 0);
+      }
+    } catch (e) {
+      console.error('Failed to load invitations', e);
+    }
+  }, [assessmentId, activeTab, currentPage, debouncedSearch]);
+
   useEffect(() => {
     fetchCandidates();
-  }, [fetchCandidates]);
+  }, [fetchCandidates, refreshTrigger]);
+
+  useEffect(() => {
+    fetchInvitations();
+  }, [fetchInvitations, refreshTrigger]);
+
+  const handleResend = async (inviteId: string) => {
+    if (!assessmentId) return;
+    setResendingId(inviteId);
+    try {
+      await assessmentService.resendInvite(assessmentId, inviteId);
+      toast.success('Invitation resent successfully');
+      fetchInvitations();
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to resend invitation');
+    } finally {
+      setResendingId(null);
+    }
+  };
 
   // ── Status change ─────────────────────────────────────────────────────────────
   const handleStatusChange = async (sessionId: string, newStatus: ReviewStatus) => {
@@ -300,12 +368,14 @@ export const TestCandidatesTable: React.FC = () => {
     { key: 'to_review', label: `To review (${counts.to_review})`, icon: <UserCheckIcon />, hasDot: counts.to_review > 0 },
     { key: 'rejected',  label: `Rejected (${counts.rejected})`,   icon: <UserMinusIcon /> },
     { key: 'passed',    label: `Passed (${counts.passed})`,       icon: <UserCheckIcon /> },
+    { key: 'invited',   label: `Invitations (${totalInvitations})`, icon: <Mail size={14} className="tc-icon-inline" /> },
   ];
 
   // Footer: correct total for current tab
-  const tabTotal = counts[activeTab] ?? candidates.length;
-  const showingFrom = candidates.length > 0 ? (currentPage - 1) * ITEMS_PER_PAGE + 1 : 0;
-  const showingTo   = showingFrom + candidates.length - 1;
+  const tabTotal = activeTab === 'invited' ? totalInvitations : (counts[activeTab] ?? candidates.length);
+  const dataLength = activeTab === 'invited' ? invitations.length : candidates.length;
+  const showingFrom = dataLength > 0 ? (currentPage - 1) * ITEMS_PER_PAGE + 1 : 0;
+  const showingTo   = showingFrom + dataLength - 1;
 
   const activeTabLabel = TABS.find((t) => t.key === activeTab)?.label ?? '';
 
@@ -353,6 +423,16 @@ export const TestCandidatesTable: React.FC = () => {
           >
             <Download size={16} />
           </button>
+          {onInviteClick && (
+            <button
+              className="tc-invite-btn"
+              onClick={onInviteClick}
+              title="Invite Candidates"
+            >
+              <Mail size={14} />
+              <span>Invite</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -363,8 +443,95 @@ export const TestCandidatesTable: React.FC = () => {
         <div style={{ textAlign: 'center', color: '#ef4444', padding: '2rem' }}>{error}</div>
       ) : (
         <>
-          {/* ── Table ─────────────────────────────────────────────── */}
-          <div className="tc-table-container">
+          {activeTab === 'invited' ? (
+            /* ── Invitations Table ─────────────────────────────────────── */
+            <div className="tc-table-container">
+          <table className="tc-table">
+            <thead>
+              <tr>
+                <th className="tc-col-candidate"><UsersIcon /> Invited Candidate</th>
+                <th className="tc-col-status">Status</th>
+                <th>Sent Date</th>
+                <th>Activity</th>
+                <th style={{ textAlign: 'right' }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody className="page-fade-in">
+              {invitations.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="tc-empty-state">
+                    No candidate invitations sent yet for this assessment. Click "Invite" to send invitations.
+                  </td>
+                </tr>
+              ) : (
+                invitations.map((inv) => {
+                  const cfg = getInviteStatusConfig(inv.status);
+                  return (
+                    <tr key={inv.id}>
+                      <td>
+                        <div className="tc-candidate-cell">
+                          <div className="tc-avatar-group">
+                            <div className="tc-avatar" style={{ backgroundColor: '#fff5f2', color: '#ef4623' }}>
+                              <Mail size={14} />
+                            </div>
+                          </div>
+                          <div className="tc-candidate-info">
+                            <span className="tc-name" style={{ fontWeight: 600 }}>{inv.name || '—'}</span>
+                            <span className="tc-email">{inv.email}</span>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <span className={`status-pill ${cfg.pillClass}`}>
+                          <span className={`status-dot ${cfg.dotClass}`} />
+                          {cfg.label}
+                        </span>
+                      </td>
+                      <td>
+                        <span className="tc-text-neutral">
+                          {new Date(inv.sentAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </td>
+                      <td>
+                        <span className="tc-text-neutral" style={{ fontSize: '12.5px' }}>
+                          {inv.completedAt
+                            ? `Completed: ${new Date(inv.completedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+                            : inv.startedAt
+                            ? `Started: ${new Date(inv.startedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+                            : inv.openedAt
+                            ? `Opened: ${new Date(inv.openedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+                            : 'Not opened yet'}
+                        </span>
+                      </td>
+                      <td style={{ textAlign: 'right' }}>
+                        <button
+                          className="tc-resend-btn"
+                          onClick={() => handleResend(inv.id)}
+                          disabled={resendingId === inv.id}
+                          title="Resend invitation email"
+                        >
+                          <RefreshCw size={13} className={resendingId === inv.id ? 'tc-spinner' : ''} />
+                          <span>{resendingId === inv.id ? 'Resending...' : 'Resend'}</span>
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+
+          {invitations.length > 0 && (
+            <div className="tc-table-footer" style={{ padding: '16px 24px', borderTop: '1px solid var(--border-color, #e2e8f0)' }}>
+              <span style={{ fontSize: '13px', color: '#64748b' }}>
+                Showing {showingFrom}–{showingTo} of {tabTotal} invitations
+              </span>
+            </div>
+          )}
+            </div>
+          ) : (
+            /* ── Candidate Sessions Table ───────────────────────────── */
+            <div className="tc-table-container">
             <table className="tc-table">
               <thead>
                 <tr>
@@ -439,7 +606,8 @@ export const TestCandidatesTable: React.FC = () => {
                 </span>
               </div>
             )}
-          </div>
+            </div>
+          )}
 
           {/* ── Pagination (only when multiple pages) ─── */}
           {totalPages > 1 && (

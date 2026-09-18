@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Settings, Info, Copy, Check, Loader2, Save } from 'lucide-react';
+import { ArrowLeft, Settings, Info, Copy, Check, Loader2, Save, Mail } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 import { DndContext, PointerSensor, useSensor, useSensors, DragOverlay, closestCenter } from '@dnd-kit/core';
 import type { DragStartEvent, DragEndEvent } from '@dnd-kit/core';
@@ -7,6 +7,7 @@ import { TestSettings } from './TestSettings';
 import { TestBuildPane } from '../../components/features/test/TestBuildPane';
 import { QuestionBankPane } from '../../components/features/test/QuestionBankPane';
 import { TestCandidatesTable } from '../../components/features/test/TestCandidatesTable';
+import { InviteCandidatesModal } from '../../components/features/test/InviteCandidatesModal';
 import { TableSkeleton } from '../../components/ui';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { addQuestionToTest, reorderTestQuestions, updateAssessmentQuestionsRequest, setTestQuestions } from '../../store/slices/assessmentSlice';
@@ -23,6 +24,8 @@ export const TestDetail: React.FC = () => {
   const [isPublished, setIsPublished] = useState(false);
   const [copied, setCopied] = useState(false);
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const dispatch = useAppDispatch();
   const bankQuestions = useAppSelector((s) => s.assessment.bankQuestions);
@@ -132,6 +135,14 @@ export const TestDetail: React.FC = () => {
   const activeDragQuestion = bankQuestions.find((q) => q.id === activeDragId) ??
     selectedQuestions.find((q) => q.id === activeDragId);
 
+  // --- Calculate Time-Based Progress ---
+  const totalEstimatedMinutes = selectedQuestions.reduce((sum, q) => sum + Math.ceil((q.estimated_time_seconds || (q as any).estimatedTimeSeconds || 300) / 60), 0);
+  const targetMinutes = assessment?.duration_minutes || 60; // Fallback to 60 if missing
+  const progressPercentage = targetMinutes > 0 ? Math.round((totalEstimatedMinutes / targetMinutes) * 100) : 0;
+  const displayPercentage = Math.min(progressPercentage, 100);
+  const isOverTime = progressPercentage > 100;
+  // -------------------------------------
+
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div className="page-wrapper td-page">
@@ -171,8 +182,12 @@ export const TestDetail: React.FC = () => {
                 {isSaving ? 'Saving...' : 'Save Structure'}
               </button>
             )}
+            <button className="btn-primary" onClick={() => setIsInviteModalOpen(true)}>
+              <Mail size={16} />
+              <span>Invite Candidates</span>
+            </button>
             {!isPublished ? (
-              <button className="btn-primary" onClick={handlePublish}>
+              <button className="btn-secondary" onClick={handlePublish}>
                 Publish Assessment
               </button>
             ) : (
@@ -210,8 +225,20 @@ export const TestDetail: React.FC = () => {
                 <div className="metric-circular-chart">
                   <svg viewBox="0 0 36 36" className="circular-chart">
                     <path className="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                    <path className="circle" strokeDasharray={`${selectedQuestions.length * 10}, 100`} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                    <text x="18" y="20.35" className="percentage">{selectedQuestions.length * 10}%</text>
+                    <path 
+                      className="circle" 
+                      strokeDasharray={`${displayPercentage}, 100`} 
+                      style={isOverTime ? { stroke: 'var(--color-error)' } : undefined}
+                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
+                    />
+                    <text 
+                      x="18" 
+                      y="20.35" 
+                      className="percentage"
+                      style={isOverTime ? { fill: 'var(--color-error)' } : undefined}
+                    >
+                      {progressPercentage}%
+                    </text>
                   </svg>
                 </div>
                 <div className="metric-info">
@@ -253,7 +280,12 @@ export const TestDetail: React.FC = () => {
           </>
         )}
 
-        {activeTab === 'candidates' && <TestCandidatesTable />}
+        {activeTab === 'candidates' && (
+          <TestCandidatesTable
+            refreshTrigger={refreshKey}
+            onInviteClick={() => setIsInviteModalOpen(true)}
+          />
+        )}
           </>
         )}
       </div>
@@ -266,6 +298,17 @@ export const TestDetail: React.FC = () => {
           </div>
         ) : null}
       </DragOverlay>
+
+      {/* Invite Candidates Modal */}
+      {assessment && (
+        <InviteCandidatesModal
+          assessmentId={assessment.id}
+          assessmentTitle={assessment.title}
+          isOpen={isInviteModalOpen}
+          onClose={() => setIsInviteModalOpen(false)}
+          onSuccess={() => setRefreshKey((k) => k + 1)}
+        />
+      )}
     </DndContext>
   );
 };
