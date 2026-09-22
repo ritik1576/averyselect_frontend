@@ -284,6 +284,12 @@ export interface SessionReport {
   candidate_email?: string;
   started_at?: string;
   completed_at?: string;
+  result?: {
+    totalScore: number;
+    maxScore: number;
+    percentage: number;
+    isPassed: boolean;
+  };
 }
 
 // ─── UI-layer composite types (not stored in DB) ──────────────

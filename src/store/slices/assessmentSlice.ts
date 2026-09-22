@@ -19,6 +19,7 @@ export interface FetchAssessmentsParams {
   search?: string;
   sortBy?: string;
   sortDir?: string;
+  status?: 'ACTIVE' | 'ARCHIVED' | 'ALL';
 }
 
 interface AssessmentBuilderState {
@@ -175,6 +176,47 @@ const assessmentSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
+    deleteAssessmentRequest(state, _action: PayloadAction<string>) {
+      state.loading = true;
+      state.error = null;
+    },
+    deleteAssessmentSuccess(state, action: PayloadAction<string>) {
+      state.loading = false;
+      state.tests = state.tests.filter(t => t.id !== action.payload);
+      state.totalItems = Math.max(0, state.totalItems - 1);
+    },
+    deleteAssessmentFailure(state, action: PayloadAction<string>) {
+      state.loading = false;
+      state.error = action.payload;
+    },
+    archiveAssessmentRequest(state, _action: PayloadAction<string>) {
+      state.loading = true;
+      state.error = null;
+    },
+    archiveAssessmentSuccess(state, action: PayloadAction<string>) {
+      state.loading = false;
+      const index = state.tests.findIndex(a => a.id === action.payload);
+      if (index !== -1) {
+        state.tests[index].deletedAt = new Date().toISOString();
+      }
+    },
+    archiveAssessmentFailure(state, action: PayloadAction<string>) {
+      state.loading = false;
+      state.error = action.payload;
+    },
+    duplicateAssessmentRequest(state, _action: PayloadAction<string>) {
+      state.loading = true;
+      state.error = null;
+    },
+    duplicateAssessmentSuccess(state, action: PayloadAction<Assessment>) {
+      state.loading = false;
+      state.tests.unshift(action.payload);
+      state.totalItems += 1;
+    },
+    duplicateAssessmentFailure(state, action: PayloadAction<string>) {
+      state.loading = false;
+      state.error = action.payload;
+    },
   },
 });
 
@@ -196,6 +238,15 @@ export const {
   updateAssessmentQuestionsRequest,
   updateAssessmentQuestionsSuccess,
   updateAssessmentQuestionsFailure,
+  deleteAssessmentRequest,
+  deleteAssessmentSuccess,
+  deleteAssessmentFailure,
+  archiveAssessmentRequest,
+  archiveAssessmentSuccess,
+  archiveAssessmentFailure,
+  duplicateAssessmentRequest,
+  duplicateAssessmentSuccess,
+  duplicateAssessmentFailure,
 } = assessmentSlice.actions;
 
 export default assessmentSlice.reducer;

@@ -73,8 +73,17 @@ export const sessionService = {
     };
 
     // Map the backend session data into the QuestionResult array format expected by the UI
+    const isCompleted = !!sessionData?.result;
     const allQuestions = sessionData?.assessment?.questions || [];
-    const mappedQuestions = allQuestions.map((aq: any, index: number) => {
+    
+    // Filter out questions added after completion
+    const relevantQuestions = allQuestions.filter((aq: any) => {
+      if (!isCompleted) return true; // Keep all for in-progress
+      // For completed sessions, only keep questions that have a historical QuestionResult
+      return sessionData.result?.questionResults?.some((qr: any) => qr.questionId === aq.question?.id);
+    });
+
+    const mappedQuestions = relevantQuestions.map((aq: any, index: number) => {
       const q = aq.question || {};
       const attempt = sessionData?.attempts?.find((a: any) => a.questionId === q.id) || {};
       const isCoding = q.type === 'CODING' || q.type === 'coding';
@@ -82,7 +91,7 @@ export const sessionService = {
       
       const score = qResult?.score || 0;
       // IMPORTANT: Use the historical graded QuestionResult.maxScore if available.
-      // For unanswered questions, fallback to the assessment-specific AssessmentQuestion.points.
+      // For unanswered questions (in progress), fallback to the assessment-specific AssessmentQuestion.points.
       const maxScore = qResult?.maxScore ?? aq.points ?? 0;
       const isCorrect = qResult?.isCorrect ?? (score > 0 && score >= maxScore);
       const timeTakenStr = attempt.timeSpentMs ? formatTime(attempt.timeSpentMs) : '00:00';
@@ -159,6 +168,13 @@ export const sessionService = {
       };
     });
 
+    const resultBlock = sessionData?.result ? {
+      totalScore: sessionData.result.totalScore,
+      maxScore: sessionData.result.maxScore,
+      percentage: sessionData.result.percentage,
+      isPassed: sessionData.result.isPassed,
+    } : undefined;
+
     return { 
       data: {
         questions: mappedQuestions,
@@ -168,6 +184,7 @@ export const sessionService = {
         candidate_email: sessionData?.candidate?.email,
         started_at: sessionData?.startedAt,
         completed_at: sessionData?.completedAt,
+        result: resultBlock,
       }, 
       success: true 
     };

@@ -25,6 +25,25 @@ const TYPE_LABEL: Record<string, string> = {
   free_text: 'Free Text',
 };
 
+// difficulty 1 → Easy, 2–3 → Medium, 4–5 → Hard
+const DIFFICULTY_LEVELS = [
+  { key: 'all',    label: 'All' },
+  { key: 'easy',   label: 'Easy' },
+  { key: 'medium', label: 'Medium' },
+  { key: 'hard',   label: 'Hard' },
+] as const;
+
+type DifficultyKey = typeof DIFFICULTY_LEVELS[number]['key'];
+
+function matchesDifficulty(q: Question, filter: DifficultyKey): boolean {
+  if (filter === 'all') return true;
+  const d = q.difficulty ?? 1;
+  if (filter === 'easy')   return d === 1;
+  if (filter === 'medium') return d === 2 || d === 3;
+  if (filter === 'hard')   return d >= 4;
+  return true;
+}
+
 // ─── Single draggable question card ──────────────────────────────────────────
 const DraggableQuestionCard: React.FC<{ question: Question }> = ({ question }) => {
   const dispatch = useAppDispatch();
@@ -71,6 +90,7 @@ export const QuestionBankPane: React.FC<{ onClose?: () => void }> = ({ onClose }
   const bankQuestions = useAppSelector((s) => s.assessment.bankQuestions);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
+  const [filterDifficulty, setFilterDifficulty] = useState<DifficultyKey>('all');
   const dispatch = useAppDispatch();
 
   useEffect(() => {
@@ -78,14 +98,15 @@ export const QuestionBankPane: React.FC<{ onClose?: () => void }> = ({ onClose }
       search: searchQuery || undefined,
       type: filterType !== 'all' ? filterType : undefined,
       page: 1,
-      limit: 100 // Fetch a large batch for the builder bank
+      limit: 100,
     }));
   }, [dispatch, searchQuery, filterType]);
 
   const filtered = bankQuestions.filter((q) => {
     const matchesSearch = q.title.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesType = filterType === 'all' || q.question_type === filterType;
-    return matchesSearch && matchesType;
+    const matchesDiff = matchesDifficulty(q, filterDifficulty);
+    return matchesSearch && matchesType && matchesDiff;
   });
 
   return (
@@ -116,7 +137,7 @@ export const QuestionBankPane: React.FC<{ onClose?: () => void }> = ({ onClose }
         </div>
       </div>
 
-      {/* Filters */}
+      {/* Type + Difficulty Filter Row */}
       <div className="bank-filters">
         <span className="filter-label">TYPE:</span>
         {(['all', 'mcq', 'coding', 'free_text'] as const).map((type) => (
@@ -128,6 +149,20 @@ export const QuestionBankPane: React.FC<{ onClose?: () => void }> = ({ onClose }
             {type === 'all' ? 'All' : TYPE_LABEL[type]}
           </button>
         ))}
+
+        {/* Difficulty dropdown — right-aligned */}
+        <div className="bank-diff-dropdown-wrap">
+          <select
+            className="bank-diff-dropdown"
+            value={filterDifficulty}
+            onChange={(e) => setFilterDifficulty(e.target.value as DifficultyKey)}
+          >
+            <option value="all">All Levels</option>
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
+          </select>
+        </div>
       </div>
 
       {/* List */}
@@ -135,10 +170,10 @@ export const QuestionBankPane: React.FC<{ onClose?: () => void }> = ({ onClose }
         {filtered.length === 0 ? (
           <div className="bank-empty-state">
             <p>No questions found.</p>
-            {searchQuery && (
+            {(searchQuery || filterDifficulty !== 'all') && (
               <div style={{ marginTop: '12px' }}>
-                <Button variant="outline" size="sm" onClick={() => setSearchQuery('')}>
-                  Clear search
+                <Button variant="outline" size="sm" onClick={() => { setSearchQuery(''); setFilterDifficulty('all'); }}>
+                  Clear filters
                 </Button>
               </div>
             )}

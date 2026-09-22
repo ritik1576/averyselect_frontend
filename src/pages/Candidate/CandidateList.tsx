@@ -2,8 +2,9 @@ import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react'
 import { Calendar, ChevronDown, Search, Download, ArrowUpDown, Info, X, Check, Users } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { sessionService } from '../../services/api/session.service';
+import { assessmentService } from '../../services/api/assessment.service';
 import { Pagination } from '../../components/ui';
-import type { SessionStatus, CandidateSessionListItem } from '../../types';
+import type { SessionStatus, CandidateSessionListItem, Assessment } from '../../types';
 import './CandidateList.css';
 
 type SortField = 'test' | 'candidate' | 'started_at' | 'score';
@@ -47,12 +48,14 @@ export const CandidateList: React.FC = () => {
   const [searchInput, setSearchInput]   = useState('');
   const [searchQuery, setSearchQuery]   = useState('');
   const [statusFilter, setStatusFilter] = useState<SessionStatus | 'all'>('all');
+  const [testFilter, setTestFilter]     = useState<string | 'all'>('all');
   const [dateFrom, setDateFrom]         = useState('');
   const [dateTo, setDateTo]             = useState('');
   const [sortField, setSortField]       = useState<SortField>('started_at');
   const [sortDir, setSortDir]           = useState<SortDir>('desc');
 
   // ── Server-driven data ───────────────────────────────────────────
+  const [tests, setTests]         = useState<Assessment[]>([]);
   const [sessions, setSessions]   = useState<CandidateSessionListItem[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
@@ -76,6 +79,7 @@ export const CandidateList: React.FC = () => {
         limit:   ITEMS_PER_PAGE,
         search:  searchQuery || undefined,
         status:  statusFilter !== 'all' ? statusFilter.toUpperCase() : undefined,
+        assessmentId: testFilter !== 'all' ? testFilter : undefined,
         dateFrom: dateFrom || undefined,
         dateTo:   dateTo || undefined,
         sortBy:  sortByMap[sortField],
@@ -90,13 +94,26 @@ export const CandidateList: React.FC = () => {
       setLoading(false);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchQuery, statusFilter, dateFrom, dateTo, sortField, sortDir]);
+  }, [searchQuery, statusFilter, testFilter, dateFrom, dateTo, sortField, sortDir]);
 
   // Re-fetch when filters / sort change (also resets to page 1)
   useEffect(() => {
     setCurrentPage(1);
     fetchSessions(1);
   }, [fetchSessions]);
+
+  // Fetch available tests for the dropdown
+  useEffect(() => {
+    const fetchTests = async () => {
+      try {
+        const result = await assessmentService.getAll({ limit: 500 });
+        setTests(result.data || []);
+      } catch (err) {
+        console.error('Failed to fetch tests', err);
+      }
+    };
+    fetchTests();
+  }, []);
 
   // Re-fetch when page changes (without resetting to 1)
   const prevPage = useRef(1);
@@ -116,13 +133,18 @@ export const CandidateList: React.FC = () => {
   // ── Dropdown open/close ──────────────────────────────────────────
   const [statusOpen, setStatusOpen] = useState(false);
   const [dateOpen, setDateOpen]     = useState(false);
+  const [testOpen, setTestOpen]     = useState(false);
+  const [testSearch, setTestSearch] = useState('');
+  
   const statusRef = useRef<HTMLDivElement>(null);
   const dateRef   = useRef<HTMLDivElement>(null);
+  const testRef   = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (statusRef.current && !statusRef.current.contains(e.target as Node)) setStatusOpen(false);
       if (dateRef.current   && !dateRef.current.contains(e.target as Node))   setDateOpen(false);
+      if (testRef.current   && !testRef.current.contains(e.target as Node))   setTestOpen(false);
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
@@ -168,6 +190,8 @@ export const CandidateList: React.FC = () => {
   );
 
   const selectedStatusLabel = STATUS_OPTIONS.find((o) => o.value === statusFilter)?.label ?? 'All Status';
+  const selectedTestLabel = testFilter === 'all' ? 'All Tests' : (tests.find(t => t.id === testFilter)?.title ?? 'All Tests');
+  const filteredTests = tests.filter(t => t.title?.toLowerCase().includes(testSearch.toLowerCase()));
 
   return (
     <div className="page-wrapper">
@@ -245,6 +269,54 @@ export const CandidateList: React.FC = () => {
             )}
           </div>
 
+          {/* Test Dropdown */}
+          <div ref={testRef} className="cl-dropdown-wrap">
+            <button className={`cl-filter-pill ${testFilter !== 'all' ? 'cl-filter-pill--active' : ''}`} onClick={() => setTestOpen((o) => !o)}>
+              <span className="cl-filter-pill-text" style={{ maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {selectedTestLabel}
+              </span>
+              <ChevronDown size={14} className={testOpen ? 'rotated' : ''} />
+            </button>
+            {testOpen && (
+              <div className="cl-dropdown-panel cl-test-dropdown">
+                {tests.length > 5 && (
+                  <div className="cl-dropdown-search-wrap">
+                    <Search size={14} className="cl-dropdown-search-icon" />
+                    <input 
+                      type="text" 
+                      placeholder="Find a test..." 
+                      className="cl-dropdown-search-input"
+                      value={testSearch}
+                      onChange={(e) => setTestSearch(e.target.value)}
+                    />
+                  </div>
+                )}
+                <div className="cl-dropdown-list">
+                  <button
+                    className={`cl-dropdown-item ${testFilter === 'all' ? 'cl-dropdown-item--active' : ''}`}
+                    onClick={() => { setTestFilter('all'); setTestOpen(false); setCurrentPage(1); setTestSearch(''); }}
+                  >
+                    All Tests
+                    {testFilter === 'all' && <Check size={13} />}
+                  </button>
+                  {filteredTests.map((test) => (
+                    <button
+                      key={test.id}
+                      className={`cl-dropdown-item ${testFilter === test.id ? 'cl-dropdown-item--active' : ''}`}
+                      onClick={() => { setTestFilter(test.id); setTestOpen(false); setCurrentPage(1); setTestSearch(''); }}
+                    >
+                      {test.title}
+                      {testFilter === test.id && <Check size={13} />}
+                    </button>
+                  ))}
+                  {filteredTests.length === 0 && tests.length > 0 && (
+                    <div className="cl-dropdown-empty">No tests match "{testSearch}"</div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Status Dropdown */}
           <div ref={statusRef} className="cl-dropdown-wrap">
             <button className={`cl-filter-pill ${statusFilter !== 'all' ? 'cl-filter-pill--active' : ''}`} onClick={() => setStatusOpen((o) => !o)}>
@@ -273,7 +345,7 @@ export const CandidateList: React.FC = () => {
             <input
               type="text"
               className="search-field__input cl-search-input"
-              placeholder="Filter by test, candidate, email..."
+              placeholder="Search candidate or email..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
             />
@@ -354,12 +426,12 @@ export const CandidateList: React.FC = () => {
                   <div className="cl-empty-state">
                     <Users size={40} strokeWidth={1.5} className="cl-empty-icon" />
                     <div className="cl-empty-title">
-                      {searchInput || statusFilter !== 'all' || dateFrom
+                      {searchInput || statusFilter !== 'all' || dateFrom || testFilter !== 'all'
                         ? 'No candidates found'
                         : 'No candidates yet'}
                     </div>
                     <div className="cl-empty-subtitle">
-                      {searchInput || statusFilter !== 'all' || dateFrom
+                      {searchInput || statusFilter !== 'all' || dateFrom || testFilter !== 'all'
                         ? 'Try adjusting your search or filters to find what you are looking for.'
                         : 'When candidates are invited and take tests, they will appear here.'}
                     </div>

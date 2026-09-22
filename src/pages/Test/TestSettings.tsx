@@ -37,33 +37,58 @@ export const TestSettings: React.FC<TestSettingsProps> = ({ assessment: currentA
     unusualActivityAlerts: true,
   });
 
+  const tests = useAppSelector(s => s.assessment.tests);
+  const updatedAssessment = currentAssessment 
+    ? tests.find(t => t.id === currentAssessment.id) || currentAssessment
+    : undefined;
+
   useEffect(() => {
-    if (currentAssessment) {
-      setTitle(currentAssessment.title || '');
-      setDurationMinutes((currentAssessment as any).durationMinutes ?? 45);
-      setPassingPercentage((currentAssessment as any).passingPercentage ?? 60);
+    if (updatedAssessment) {
+      setTitle(updatedAssessment.title || '');
+      setDurationMinutes((updatedAssessment as any).durationMinutes ?? 45);
+      setPassingPercentage((updatedAssessment as any).passingPercentage ?? 60);
       
-      if ((currentAssessment as any).securitySetting) {
+      if ((updatedAssessment as any).securitySetting) {
         setSecurity({
-            fullscreenRequired: (currentAssessment as any).securitySetting.fullscreenRequired ?? true,
-            tabSwitchDetection: (currentAssessment as any).securitySetting.tabSwitchDetection ?? true,
-            windowFocusDetection: (currentAssessment as any).securitySetting.windowFocusDetection ?? false,
-            copyPasteBlocking: (currentAssessment as any).securitySetting.copyPasteBlocking ?? true,
-            largePasteDetection: (currentAssessment as any).securitySetting.largePasteDetection ?? false,
-            unusualActivityAlerts: (currentAssessment as any).securitySetting.unusualActivityAlerts ?? true,
+            fullscreenRequired: (updatedAssessment as any).securitySetting.fullscreenRequired ?? true,
+            tabSwitchDetection: (updatedAssessment as any).securitySetting.tabSwitchDetection ?? true,
+            windowFocusDetection: (updatedAssessment as any).securitySetting.windowFocusDetection ?? false,
+            copyPasteBlocking: (updatedAssessment as any).securitySetting.copyPasteBlocking ?? true,
+            largePasteDetection: (updatedAssessment as any).securitySetting.largePasteDetection ?? false,
+            unusualActivityAlerts: (updatedAssessment as any).securitySetting.unusualActivityAlerts ?? true,
         });
       }
     }
-  }, [currentAssessment]);
+  }, [updatedAssessment]);
 
   const handleSave = () => {
     if (!currentAssessment) return;
-    const payload = {
+    
+    const duration = durationMinutes === '' ? 45 : durationMinutes;
+    const pass = passingPercentage === '' ? 60 : passingPercentage;
+
+    if (duration < 5 || duration > 180) {
+      alert("Duration must be between 5 and 180 minutes.");
+      return;
+    }
+
+    if (pass < 10 || pass > 100) {
+      alert("Passing percentage must be between 10 and 100.");
+      return;
+    }
+
+    const payload: any = {
       title,
-      durationMinutes: durationMinutes === '' ? 45 : durationMinutes,
-      passingPercentage: passingPercentage === '' ? 60 : passingPercentage,
       securitySetting: security as any
     };
+
+    if (duration !== (currentAssessment as any)?.durationMinutes) {
+      payload.durationMinutes = duration;
+    }
+    if (pass !== (currentAssessment as any)?.passingPercentage) {
+      payload.passingPercentage = pass;
+    }
+
     console.log("Saving Assessment Payload:", JSON.stringify(payload, null, 2));
     dispatch(updateAssessmentRequest({
       id: currentAssessment.id,
@@ -100,7 +125,7 @@ export const TestSettings: React.FC<TestSettingsProps> = ({ assessment: currentA
             <input
               type="number"
               value={passingPercentage}
-              onChange={(e) => setPassingPercentage(e.target.value === '' ? '' : Math.max(0, Math.min(100, Number(e.target.value))))}
+              onChange={(e) => setPassingPercentage(e.target.value === '' ? '' : Number(e.target.value))}
               className="ts-input"
             />
           </div>
@@ -298,7 +323,7 @@ export const TestSettings: React.FC<TestSettingsProps> = ({ assessment: currentA
                     max={480}
                     className="ts-input"
                     value={durationMinutes}
-                    onChange={(e) => setDurationMinutes(e.target.value === '' ? '' : Math.min(480, Math.max(1, Number(e.target.value))))}
+                    onChange={(e) => setDurationMinutes(e.target.value === '' ? '' : Number(e.target.value))}
                   />
                 </div>
                 {/* MVP: "No time limit" requires duration_minutes to be nullable in DB — not supported yet

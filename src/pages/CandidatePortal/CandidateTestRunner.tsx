@@ -10,7 +10,7 @@ import { fetchTestPayloadRequest, submitTestRequest } from '../../store/slices/s
 import { getStarterCode, isStaleStarterCode } from '../../utils/starterCode';
 
 const Editor = React.lazy(() => import('@monaco-editor/react'));
-import ReactMarkdown from 'react-markdown';
+import { ProblemStatement } from '../../components/features/test/ProblemStatement';
 import { motion, AnimatePresence } from 'framer-motion';
 import './CandidateTestRunner.css';
 
@@ -146,7 +146,7 @@ export const CandidateTestRunner: React.FC = () => {
 
   const testQuestions = testPayload || [];
   const currentQ: any = testQuestions[currentIdx];
-  const currentLangKey = selectedLanguages[currentQ?.id] || 'javascript';
+  const currentLangKey = selectedLanguages[currentQ?.id] || currentQ?.languages?.[0]?.languageName?.toLowerCase() || 'javascript';
   const currentLangConfig = LANGUAGE_TEMPLATES[currentLangKey] || LANGUAGE_TEMPLATES.javascript;
   const currentQLang = currentQ?.languages?.find((l: any) => l.languageName.toLowerCase() === currentLangKey.toLowerCase());
   
@@ -404,7 +404,7 @@ export const CandidateTestRunner: React.FC = () => {
             // answersRef is read inside setSecondsLeft's closure, but answers/selectedLanguages
             // are captured via the dependency array below.
             isAutoSubmittingRef.current = true;
-            dispatch(submitTestRequest({ answers, selectedLanguages }));
+            dispatch(submitTestRequest({ answers, selectedLanguages: getFullSelectedLanguages(selectedLanguages) }));
           }, 500);
           return 0;
         }
@@ -552,9 +552,20 @@ export const CandidateTestRunner: React.FC = () => {
   }, []);
 
 
+  // Helper to ensure all coding questions have their language included in the payload
+  const getFullSelectedLanguages = (currentSelections: Record<string, string>) => {
+    const fullMap = { ...currentSelections };
+    testQuestions.forEach((q: any) => {
+      if (q.type === 'code' && !fullMap[q.id]) {
+        fullMap[q.id] = q.languages?.[0]?.languageName?.toLowerCase() || 'javascript';
+      }
+    });
+    return fullMap;
+  };
+
   const handleSubmitFinal = () => {
     setIsSubmitModalOpen(false);
-    dispatch(submitTestRequest({ answers, selectedLanguages }));
+    dispatch(submitTestRequest({ answers, selectedLanguages: getFullSelectedLanguages(selectedLanguages) }));
     localStorage.removeItem(STORAGE_KEY_ANSWERS);
     localStorage.removeItem(STORAGE_KEY_TIMER);
     navigate(`/take/${token || 'demo'}/submitted`);
@@ -628,8 +639,8 @@ export const CandidateTestRunner: React.FC = () => {
               <span>{tabSwitchCount} Warning{tabSwitchCount > 1 ? 's' : ''}</span>
             </div>
           )}
-          <div className="tr-timer-badge">
-            <Clock size={16} color="#ea580c" />
+          <div className={`tr-timer-badge ${secondsLeft <= 30 && secondsLeft > 0 ? 'tr-timer-badge--urgent' : ''}`}>
+            <Clock size={16} color={secondsLeft <= 30 && secondsLeft > 0 ? '#dc2626' : '#ea580c'} />
             <span>{formatTimer(secondsLeft)}</span>
           </div>
           <div className="tr-candidate-pill">
@@ -679,7 +690,7 @@ export const CandidateTestRunner: React.FC = () => {
               })()}
 
               <div className="tr-q-desc">
-                <ReactMarkdown>{currentQ.description || ''}</ReactMarkdown>
+                <ProblemStatement description={currentQ.description || ''} />
               </div>
             </div>
 

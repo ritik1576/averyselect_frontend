@@ -1,7 +1,4 @@
 .tc-page {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 40px 24px;
   animation: slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
