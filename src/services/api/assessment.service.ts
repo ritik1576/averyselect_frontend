@@ -2,8 +2,23 @@ import { apiClient } from './client';
 import type { Assessment, Candidate } from '../../types';
 
 export const assessmentService = {
-  getAll: async (params?: { page?: number; limit?: number; search?: string; sortBy?: string; sortDir?: string }): Promise<{ data: Assessment[], meta?: any }> => {
+  getAll: async (params?: { page?: number; limit?: number; search?: string; sortBy?: string; sortDir?: string; status?: 'ACTIVE' | 'ARCHIVED' | 'ALL' }): Promise<{ data: Assessment[], meta?: any }> => {
     const response = await apiClient.get('/assessments', { params });
+    return response.data;
+  },
+
+  delete: async (id: string): Promise<{ success: boolean; message: string }> => {
+    const response = await apiClient.delete(`/assessments/${id}`);
+    return response.data;
+  },
+
+  archive: async (id: string): Promise<{ success: boolean; message: string }> => {
+    const response = await apiClient.post(`/assessments/${id}/archive`);
+    return response.data;
+  },
+
+  duplicate: async (id: string): Promise<{ success: boolean; data: Assessment; message: string }> => {
+    const response = await apiClient.post(`/assessments/${id}/duplicate`);
     return response.data;
   },
 

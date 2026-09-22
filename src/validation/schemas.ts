@@ -8,17 +8,16 @@ export const createAssessmentSchema = z.object({
     .max(255, 'Title is too long'),
   description: z.string().optional(),
   duration_minutes: z
-    .number()
-    .int()
-    .min(1, 'Duration must be at least 1 minute')
-    .max(480, 'Duration cannot exceed 8 hours'),
+    .number({ message: 'Duration must be between 5 and 180 minutes.' })
+    .int('Duration must be between 5 and 180 minutes.')
+    .min(5, 'Duration must be between 5 and 180 minutes.')
+    .max(180, 'Duration must be between 5 and 180 minutes.'),
   language: z.enum(['English', 'French', 'Spanish']),
   pass_percentage: z
-    .number()
-    .int()
-    .min(0, 'Must be 0 or above')
-    .max(100, 'Must be 100 or below')
-    .optional(),
+    .number({ message: 'Pass percentage must be between 10 and 100%.' })
+    .int('Pass percentage must be between 10 and 100%.')
+    .min(10, 'Pass percentage must be between 10 and 100%.')
+    .max(100, 'Pass percentage must be between 10 and 100%.'),
 });
 
 export type CreateAssessmentFormValues = z.infer<typeof createAssessmentSchema>;
@@ -131,6 +130,35 @@ export const createCodingSchema = createCodingSchemaBase
   }, {
     message: 'Function contract must not be defined for FULL_PROGRAM',
     path: ['functionContract']
+  })
+  .superRefine((data, ctx) => {
+    if (data.executionMode === 'FUNCTION') {
+      const expectedArgCount = data.functionContract?.parameters?.length || 0;
+      data.test_cases.forEach((tc, index) => {
+        try {
+          const parsed = JSON.parse(tc.input);
+          if (!Array.isArray(parsed)) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: 'Input must be a valid JSON array matching the function arguments',
+              path: ['test_cases', index, 'input'],
+            });
+          } else if (parsed.length !== expectedArgCount) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: `Expected ${expectedArgCount} arguments, but got ${parsed.length}`,
+              path: ['test_cases', index, 'input'],
+            });
+          }
+        } catch (e) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Input must be valid JSON when in FUNCTION mode',
+            path: ['test_cases', index, 'input'],
+          });
+        }
+      });
+    }
   });
 
 export type CodingFormValues = z.infer<typeof createCodingSchemaBase>;

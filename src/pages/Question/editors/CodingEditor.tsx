@@ -596,11 +596,18 @@ export const CodingEditor: React.FC = () => {
                   </div>
                   <div className="test-case-io">
                     <div className="form-group">
-                      <Text variant="labelSm" color="neutral">Input <span className="tc-required">*</span></Text>
+                      <Text variant="labelSm" color="neutral">
+                        {currentExecutionMode === 'FUNCTION' ? 'INPUT ARGUMENTS' : 'STANDARD INPUT (STDIN)'} <span className="tc-required">*</span>
+                      </Text>
+                      <p style={{ fontSize: '12px', color: '#64748b', marginTop: '2px', marginBottom: '8px' }}>
+                        {currentExecutionMode === 'FUNCTION' 
+                          ? 'Enter a valid JSON array containing the function arguments.'
+                          : 'Enter the exact text that should be provided to the candidate program through standard input.'}
+                      </p>
                       <textarea
                         className={`ui-textarea ui-textarea--sm ${errors.test_cases?.[index]?.input ? 'input-error-border' : ''}`}
                         rows={3}
-                        placeholder="e.g. [1, 2, 3]"
+                        placeholder={currentExecutionMode === 'FUNCTION' ? 'e.g. [[2,7,11,15],9]' : 'e.g. 4\n2 7 11 15'}
                         {...register(`test_cases.${index}.input`)}
                       />
                       {errors.test_cases?.[index]?.input && (

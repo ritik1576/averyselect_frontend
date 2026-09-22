@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import ReactMarkdown from 'react-markdown';
+import { ProblemStatement } from '../../components/features/test/ProblemStatement';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useAppSelector } from '../../store/hooks';
@@ -8,8 +8,9 @@ import {
   X, User, Mail,
   XCircle, CheckCircle2, Copy,
   Play, Pause, Maximize2, Minimize2, RotateCcw,
-  AlertTriangle, Edit2, Check, X as XIcon, ShieldAlert, MonitorOff, CopyX
+  AlertTriangle, Edit2, Check, X as XIcon, ShieldAlert, MonitorOff, CopyX, ChevronDown
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 import './CandidateDetailReport.css';
 import { sessionService } from '../../services/api/session.service';
 
@@ -385,6 +386,21 @@ export const CandidateDetailReport: React.FC = () => {
   const [activityEvents, setActivityEvents] = useState<ActivityEvent[]>([]);
   const [editingScoreId, setEditingScoreId] = useState<number | null>(null);
 
+  const [localReviewStatus, setLocalReviewStatus] = useState<boolean | null | undefined>(undefined);
+  const [statusOpen, setStatusOpen] = useState(false);
+  const statusRef = useRef<HTMLDivElement>(null);
+
+  // Click outside listener for dropdown
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (statusRef.current && !statusRef.current.contains(e.target as Node)) {
+        setStatusOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
   useEffect(() => {
     if (id) {
       dispatch(fetchSessionReportRequest(id));
@@ -436,11 +452,41 @@ export const CandidateDetailReport: React.FC = () => {
     setEditingScoreId(null);
   };
 
-  const totalScore = questions.reduce((s, q) => s + q.score, 0);
-  const totalMax = questions.reduce((s, q) => s + q.maxScore, 0);
+  const totalScore = sessionReport?.result?.totalScore ?? questions.reduce((s, q) => s + q.score, 0);
+  const totalMax = sessionReport?.result?.maxScore ?? questions.reduce((s, q) => s + q.maxScore, 0);
 
   const { sessions } = useAppSelector((state) => state.session);
   const sessionData = sessions.find((s) => s.session_id === id);
+  const isPassed = sessionReport?.result?.isPassed ?? sessionData?.isPassed;
+
+  useEffect(() => {
+    if (isPassed !== undefined && localReviewStatus === undefined) {
+      setLocalReviewStatus(isPassed);
+    }
+  }, [isPassed, localReviewStatus]);
+
+  const handleUpdateStatus = async (newStatus: boolean | null) => {
+    if (!id) return;
+    try {
+      await sessionService.updateReviewStatus(id, newStatus);
+      setLocalReviewStatus(newStatus);
+      toast.success('Status updated successfully');
+      dispatch(fetchSessionsRequest());
+    } catch (err) {
+      toast.error('Failed to update status');
+    } finally {
+      setStatusOpen(false);
+    }
+  };
+
+  const getStatusDisplay = () => {
+    const status = localReviewStatus !== undefined ? localReviewStatus : isPassed;
+    if (status === true) return { label: 'PASSED', colorClass: 'cdr-badge-pass', colorHex: 'var(--color-success)' };
+    if (status === false) return { label: 'REJECTED', colorClass: 'cdr-badge-fail', colorHex: 'var(--color-error)' };
+    return { label: 'IN REVIEW', colorClass: 'cdr-badge-review', colorHex: 'var(--color-warning)' };
+  };
+
+  const statusDisplay = getStatusDisplay();
 
   // Calculate total time taken from session start/end times
   const startedAt = sessionData?.started_at || sessionReport?.started_at;
@@ -536,15 +582,30 @@ export const CandidateDetailReport: React.FC = () => {
         </div>
 
         <div className="cdr-header-right">
-          {sessionData?.isPassed !== undefined && (
-            <div className={`cdr-score-block ${sessionData.isPassed ? 'cdr-badge-pass' : 'cdr-badge-fail'}`}>
-              <div className="cdr-score-value" style={{ color: sessionData.isPassed ? 'var(--color-success)' : 'var(--color-error)' }}>
-                <span className="cdr-score-big">{sessionData.isPassed ? 'PASSED' : 'FAILED'}</span>
+          {(isPassed !== undefined || localReviewStatus !== undefined) && (
+            <div className={`cdr-score-block cdr-dropdown-trigger ${statusDisplay.colorClass}`} ref={statusRef} onClick={() => setStatusOpen(!statusOpen)} style={{ cursor: 'pointer', position: 'relative' }}>
+              <div className="cdr-score-value-wrap" style={{ color: statusDisplay.colorHex }}>
+                <span className="cdr-score-big">{statusDisplay.label}</span>
+                <ChevronDown size={22} strokeWidth={2.5} />
               </div>
-              <div className="cdr-score-label">STATUS ({sessionData.passingPercentage}% req)</div>
+              <div className="cdr-score-label">STATUS</div>
+
+              {statusOpen && (
+                <div className="cdr-status-dropdown" onClick={(e) => e.stopPropagation()}>
+                  <button className="cdr-status-item pass" onClick={() => handleUpdateStatus(true)}>
+                    <CheckCircle2 size={16} /> Pass
+                  </button>
+                  <button className="cdr-status-item fail" onClick={() => handleUpdateStatus(false)}>
+                    <XCircle size={16} /> Reject
+                  </button>
+                  <button className="cdr-status-item review" onClick={() => handleUpdateStatus(null)}>
+                    <AlertTriangle size={16} /> In Review
+                  </button>
+                </div>
+              )}
             </div>
           )}
-          {sessionData?.isPassed !== undefined && <div className="cdr-score-divider" />}
+          {(isPassed !== undefined || localReviewStatus !== undefined) && <div className="cdr-score-divider" />}
           
           <div className="cdr-score-block">
             <div className="cdr-score-value">
@@ -562,7 +623,14 @@ export const CandidateDetailReport: React.FC = () => {
             <div className="cdr-score-label">TIME TAKEN</div>
           </div>
 
-          <button className="cdr-close-btn" onClick={() => navigate('/candidates')}>
+          <button className="cdr-close-btn" onClick={() => {
+            const destTestId = sessionData?.assessment_id || sessionReport?.assessment_id;
+            if (destTestId) {
+              navigate(`/dashboard/tests/detail/${destTestId}`);
+            } else {
+              navigate('/dashboard/candidates');
+            }
+          }}>
             <X size={24} />
           </button>
         </div>
@@ -646,7 +714,7 @@ export const CandidateDetailReport: React.FC = () => {
                 </div>
 
                 <div className="cdr-q-box">
-                  {q.body && <div className="markdown-body"><ReactMarkdown>{q.body}</ReactMarkdown></div>}
+                  {q.body && <div className="cdr-q-box"><ProblemStatement description={q.body} /></div>}
                   {q.codeSnippet && (
                     <>
                       <pre className="cdr-code-pre">{q.codeSnippet}</pre>

@@ -254,6 +254,27 @@
   font-size: var(--text-sm);
   font-weight: var(--font-weight-bold);
   color: var(--color-primary-hover);
+  transition: all 0.3s ease;
+}
+
+@keyframes timerPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.03);
+    box-shadow: 0 0 8px 2px rgba(220, 38, 38, 0.3);
+  }
+}
+
+.tr-timer-badge--urgent {
+  background-color: #fef2f2 !important;
+  border-color: #fca5a5 !important;
+  color: #dc2626 !important;
+  animation: timerPulse 1s infinite ease-in-out;
 }
 
 .tr-candidate-pill {
@@ -977,11 +998,12 @@
 
 .tr-webcam-preview {
   position: fixed;
-  bottom: 88px;
-  left: 24px !important;
+  bottom: 76px;       /* anchored above the 64px footer bar */
+  left: 20px;        /* bottom-left corner of problem description panel */
+  top: auto !important;
   right: auto !important;
-  width: 140px;
-  height: 95px;
+  width: 135px;
+  height: 90px;
   background-color: var(--color-neutral-900);
   border-radius: var(--radius-lg);
   overflow: hidden;
@@ -989,6 +1011,7 @@
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
   z-index: 900;
   display: none;
+  transition: all 0.2s ease;
 }
 
 .tr-webcam-preview.active {
@@ -1064,103 +1087,100 @@
   font-weight: var(--font-weight-semibold);
 }
 
-/* Markdown styling for description */
-.tr-q-desc h1, .tr-q-desc h2, .tr-q-desc h3, .tr-q-desc h4, .tr-q-desc h5, .tr-q-desc h6 {
-  color: var(--color-neutral-800);
-  margin-top: 1.5em;
-  margin-bottom: 0.5em;
-}
-
-.tr-q-desc ul, .tr-q-desc ol {
-  margin-top: 0.5em;
-  margin-bottom: 1em;
-  padding-left: 20px;
-  color: var(--color-neutral-700);
-  font-size: var(--text-15);
-  line-height: 1.6;
-}
-
-.tr-q-desc code {
-  background-color: var(--color-neutral-100);
-  padding: 2px 6px;
-  border-radius: var(--radius-sm);
-  font-family: 'Fira Code', 'Courier New', Courier, monospace;
-  font-size: var(--text-sm);
-  color: var(--color-primary);
-}
-
-.tr-q-desc pre {
-  background-color: var(--color-neutral-50);
-  padding: 16px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-neutral-200);
-  overflow-x: auto;
-  margin-top: 1em;
-  margin-bottom: 1em;
-}
-
-.tr-q-desc pre code {
-  background-color: transparent;
-  padding: 0;
-  color: var(--color-neutral-700);
-  font-size: var(--text-13);
-}
-
-/* Markdown styles for question description */
+/* ─── LeetCode-style Question Description ─────────────────────────── */
 .tr-q-desc {
-  font-size: var(--text-sm);
-  line-height: 1.6;
+  font-size: 14px;
+  line-height: 1.7;
   color: var(--color-neutral-700);
+  margin-top: 20px;
+}
+
+/* Body paragraphs */
+.tr-q-desc > p {
+  margin: 0 0 14px;
+  color: var(--color-neutral-800);
+}
+
+/* Section headings — Input Format, Output Format, Constraints, Example */
+.tr-q-desc h1,
+.tr-q-desc h2,
+.tr-q-desc h3,
+.tr-q-desc h4 {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-neutral-500);
+  margin: 24px 0 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--color-neutral-200);
+}
+
+.tr-q-desc h3,
+.tr-q-desc h4 {
+  font-size: 12px;
+  color: var(--color-neutral-400);
+  border-bottom: none;
   margin-top: 16px;
 }
 
-.tr-q-desc p {
-  margin-bottom: 16px;
-}
-
-.tr-q-desc h1, .tr-q-desc h2, .tr-q-desc h3 {
-  margin-top: 24px;
-  margin-bottom: 12px;
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-neutral-900);
-}
-
-.tr-q-desc h1 { font-size: 1.25rem; }
-.tr-q-desc h2 { font-size: 1.15rem; border-bottom: 1px solid var(--color-neutral-200); padding-bottom: 4px; }
-.tr-q-desc h3 { font-size: 1.05rem; }
-
+/* Inline code — variable/values inside prose */
 .tr-q-desc code {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  font-size: 12.5px;
   background-color: var(--color-neutral-100);
-  padding: 2px 6px;
-  border-radius: var(--radius-sm);
-  font-family: 'Courier New', Courier, monospace;
-  font-size: 0.9em;
   color: var(--color-neutral-900);
+  border: 1px solid var(--color-neutral-200);
+  border-radius: 4px;
+  padding: 1px 6px;
 }
 
+/* Example blocks — dark terminal-style (Input/Output) */
 .tr-q-desc pre {
-  background-color: var(--color-neutral-50);
-  padding: 12px;
-  border-radius: var(--radius-md);
+  background-color: #1e1e2e;
+  color: #cdd6f4;
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin: 4px 0 16px;
   overflow-x: auto;
-  border: 1px solid var(--color-neutral-200);
-  margin-bottom: 16px;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
 }
 
 .tr-q-desc pre code {
-  background-color: transparent;
+  background: transparent;
+  border: none;
   padding: 0;
   color: inherit;
-  font-size: 0.85em;
+  font-size: inherit;
 }
 
-.tr-q-desc ul, .tr-q-desc ol {
-  padding-left: 20px;
-  margin-bottom: 16px;
+/* Unordered / ordered lists */
+.tr-q-desc ul,
+.tr-q-desc ol {
+  padding-left: 22px;
+  margin: 0 0 14px;
 }
 
 .tr-q-desc li {
-  margin-bottom: 4px;
+  margin-bottom: 5px;
+  color: var(--color-neutral-700);
+}
+
+/* Strong emphasis — bold text in descriptions */
+.tr-q-desc strong {
+  color: var(--color-neutral-900);
+  font-weight: 600;
+}
+
+/* Highlighted numbers/constraints inline */
+.tr-q-desc em {
+  font-style: normal;
+  color: var(--color-primary);
+  font-weight: 500;
 }
 
 /* ─── Custom Visible Scrollbars ────────────────────────────────────────── */
