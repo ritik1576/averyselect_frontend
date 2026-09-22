@@ -3,6 +3,8 @@
   flex-direction: column;
   position: relative;
   flex: 1;
+  min-height: 0;
+  overflow: hidden;
   background-color: transparent;
 }
 
@@ -35,16 +37,17 @@
 .ts-content-scroll {
   flex: 1;
   overflow-y: auto;
-  padding-bottom: 120px;
 }
 
 /* Scrollbar styling */
 .ts-content-scroll::-webkit-scrollbar {
   width: 6px;
 }
+
 .ts-content-scroll::-webkit-scrollbar-track {
   background: transparent;
 }
+
 .ts-content-scroll::-webkit-scrollbar-thumb {
   background-color: var(--color-neutral-300);
   border-radius: var(--radius-10);
@@ -167,7 +170,8 @@
 
 .ts-timer-card.active {
   border-color: var(--color-primary);
-  box-shadow: 0 4px 20px rgba(249, 115, 22, 0.05); /* subtle orange shadow */
+  box-shadow: 0 4px 20px rgba(249, 115, 22, 0.05);
+  /* subtle orange shadow */
 }
 
 .ts-timer-card-title {
@@ -324,7 +328,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .ts-toggle-switch.active .ts-toggle-knob {
@@ -356,15 +360,10 @@
   background-color: var(--color-background);
   display: flex;
   justify-content: flex-end;
-  gap: 12px;
+  gap: 8px;
   border-top: 1px solid var(--color-border);
-  margin-top: auto;
 }
 
-/* Utilities */
-.ts-pb-100 {
-  padding-bottom: 100px;
-}
 
 .ts-danger-text {
   font-weight: var(--font-weight-bold);

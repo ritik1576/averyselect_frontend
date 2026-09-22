@@ -14,7 +14,7 @@
   background-color: var(--color-background);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  overflow: hidden;
+  overflow: visible;
 }
 
 .tsd-table {
@@ -143,6 +143,8 @@
   color: var(--color-neutral);
   border-top: 1px solid var(--color-border);
   background-color: var(--color-surface);
+  border-bottom-left-radius: var(--radius-lg);
+  border-bottom-right-radius: var(--radius-lg);
 }
 
 /* Utilities */
@@ -151,7 +153,7 @@
 }
 
 .d-col-center {
-  text-align: center;
+  text-align: center !important;
 }
 
 /* ─── Sort active state ───────────────────────────────────── */
@@ -239,3 +241,101 @@
   }
 }
 
+/* ─── Tabs ────────────────────────────────────────────────────── */
+.tsd-tabs {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tsd-tab {
+  padding: 12px 4px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--color-neutral);
+  cursor: pointer;
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.tsd-tab:hover {
+  color: var(--color-secondary);
+}
+
+.tsd-tab--active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+.tsd-tab--active:hover {
+  color: var(--color-primary);
+}
+
+
+
+/* ─── Dropdown ─────────────────────────────────────────────────── */
+.tsd-dropdown-menu {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  z-index: 10;
+  background-color: #fff;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+  width: 160px;
+  display: flex;
+  flex-direction: column;
+  padding: 4px 0;
+}
+
+.tsd-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--color-text);
+  transition: background-color 0.15s;
+}
+
+.tsd-dropdown-item:hover {
+  background-color: var(--color-surface-hover);
+}
+
+.tsd-dropdown-item--danger {
+  color: var(--color-error);
+}
+
+.tsd-dropdown-item--danger:hover {
+  background-color: var(--color-error-light);
+}
+
+/* ─── Action Button ────────────────────────────────────────────── */
+.tsd-action-btn {
+  background: none;
+  border: none;
+  color: var(--color-neutral-light);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  outline: none;
+}
+
+.tsd-action-btn:hover {
+  background-color: var(--color-surface-hover);
+  color: var(--color-secondary);
+}

@@ -45,7 +45,7 @@ export const TestCreate: React.FC = () => {
   };
 
   return (
-    <div className="tc-page">
+    <div className="page-wrapper tc-page">
       <div className="tc-header">
         <button className="tc-back-btn" onClick={() => navigate('/dashboard')}>
           <ArrowLeft size={18} />
@@ -119,8 +119,6 @@ export const TestCreate: React.FC = () => {
                 <input
                   id="duration_minutes"
                   type="number"
-                  min={1}
-                  max={480}
                   className={`tc-input tc-input--icon ${errors.duration_minutes ? 'tc-input--error' : ''}`}
                   {...register('duration_minutes', { valueAsNumber: true })}
                 />
@@ -133,15 +131,13 @@ export const TestCreate: React.FC = () => {
             {/* Pass Percentage */}
             <div className="tc-form-group">
               <label className="tc-label" htmlFor="pass_percentage">
-                Pass Percentage <span className="tc-optional">(Optional)</span>
+                Pass Percentage <span className="tc-required">*</span>
               </label>
               <div className="tc-input-with-icon">
                 <Percent size={16} className="tc-input-icon" />
                 <input
                   id="pass_percentage"
                   type="number"
-                  min={0}
-                  max={100}
                   className={`tc-input tc-input--icon ${errors.pass_percentage ? 'tc-input--error' : ''}`}
                   {...register('pass_percentage', { valueAsNumber: true })}
                 />

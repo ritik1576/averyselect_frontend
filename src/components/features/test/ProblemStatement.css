@@ -1,0 +1,163 @@
+/* ─── ProblemStatement — LeetCode-style layout ─────────────────────── */
+
+.ps-root {
+  font-family: var(--font-body, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif);
+  font-size: 14px;
+  line-height: 1.7;
+  color: #3d4451;
+  padding-top: 4px;
+}
+
+/* ── Intro paragraphs ─────────────────────────────────────────────── */
+.ps-intro {
+  margin-bottom: 4px;
+}
+
+.ps-para {
+  margin: 0 0 14px;
+  color: #374151;
+  font-size: 14px;
+  line-height: 1.75;
+}
+
+/* ── Section headers (Input Format, Output Format, Constraints) ───── */
+.ps-section {
+  margin-top: 24px;
+}
+
+.ps-section-heading {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  color: #9ca3af !important;
+  margin: 0 0 10px !important;
+  padding-bottom: 8px !important;
+  border-bottom: 1px solid #e5e7eb !important;
+  line-height: 1 !important;
+}
+
+/* ── Constraint list ──────────────────────────────────────────────── */
+.ps-constraint-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ps-constraint-item {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  color: #4b5563;
+  font-size: 13.5px;
+}
+
+.ps-constraint-item::before {
+  content: '•';
+  color: #d1d5db;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.ps-constraint-code {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  font-size: 12.5px;
+  background-color: #f3f4f6;
+  color: #1f2937;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  padding: 1px 7px;
+}
+
+/* ── Example blocks ───────────────────────────────────────────────── */
+.ps-example {
+  margin-top: 24px;
+}
+
+/* Side-by-side grid for Input / Output */
+.ps-io-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.ps-io-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ps-io-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+
+/* Dark terminal-style example blocks */
+.ps-io-pre {
+  margin: 0;
+  background-color: #1e1e2e;
+  color: #cdd6f4;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  font-size: 13px;
+  line-height: 1.65;
+  padding: 12px 14px;
+  border-radius: 8px;
+  overflow-x: auto;
+  white-space: pre;
+  min-height: 48px;
+}
+
+/* Raw example block (no parsed Input/Output) */
+.ps-io-raw {
+  margin: 8px 0 0;
+  background-color: #1e1e2e;
+  color: #cdd6f4;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  font-size: 13px;
+  line-height: 1.65;
+  padding: 14px 18px;
+  border-radius: 8px;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+/* ── Explanation block ────────────────────────────────────────────── */
+.ps-explanation {
+  margin-top: 12px;
+  background-color: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+
+.ps-explanation-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #92400e;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.ps-explanation-text {
+  margin: 0;
+  font-size: 13.5px;
+  color: #78350f;
+  line-height: 1.6;
+}
+
+/* ── Responsive: Stack Input/Output on narrow panes ──────────────── */
+@media (max-width: 600px) {
+  .ps-io-grid {
+    grid-template-columns: 1fr;
+  }
+}
