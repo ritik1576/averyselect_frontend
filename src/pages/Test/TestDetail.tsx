@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ArrowLeft, Settings, Info, Copy, Check, Loader2, Save, Mail, AlertTriangle, Globe, EyeOff } from 'lucide-react';
+import { ArrowLeft, Settings, Info, Copy, Check, Loader2, Save, AlertTriangle, Globe, EyeOff } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { DndContext, PointerSensor, useSensor, useSensors, DragOverlay, closestCenter } from '@dnd-kit/core';
