@@ -93,11 +93,11 @@ export function useWebcamProctoring({ onIntegrityEvent, faceDetectionIntervalMs 
 
   // Attach Stream to Video element
   useEffect(() => {
-    if (videoRef.current && mediaStream) {
+    if (videoRef.current && mediaStream && videoRef.current.srcObject !== mediaStream) {
       videoRef.current.srcObject = mediaStream;
       videoRef.current.play().catch(console.warn);
     }
-  }, [mediaStream]);
+  }); // Runs after every render to handle React remounts
 
   // Init Face Detector
   useEffect(() => {
@@ -105,7 +105,7 @@ export function useWebcamProctoring({ onIntegrityEvent, faceDetectionIntervalMs 
     const initDetector = async () => {
       try {
         const vision = await FilesetResolver.forVisionTasks(
-          'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm'
+          'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/wasm'
         );
         if (!active) return;
         const detector = await FaceDetector.createFromOptions(vision, {
@@ -145,7 +145,7 @@ export function useWebcamProctoring({ onIntegrityEvent, faceDetectionIntervalMs 
       const detector = faceDetectorRef.current;
 
       // HTMLMediaElement.HAVE_CURRENT_DATA = 2
-      if (video && detector && video.readyState >= 2 && mediaStream && cameraStatus === 'active') {
+      if (video && detector && video.readyState >= 2 && video.videoWidth > 0 && mediaStream && cameraStatus === 'active') {
         
         // Ensure we only process new frames
         if (video.currentTime !== lastVideoTime.current) {
