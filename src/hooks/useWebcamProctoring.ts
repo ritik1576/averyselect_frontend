@@ -38,6 +38,11 @@ export function useWebcamProctoring({ onIntegrityEvent, faceDetectionIntervalMs 
   const rafId = useRef<number | null>(null);
   const lastVideoTime = useRef<number>(-1);
 
+  const onIntegrityEventRef = useRef(onIntegrityEvent);
+  useEffect(() => {
+    onIntegrityEventRef.current = onIntegrityEvent;
+  }, [onIntegrityEvent]);
+
   const dispatchEvent = useCallback((event: IntegrityEvent, type: 'camera' | 'face') => {
     if (type === 'camera') {
       if (lastCameraEvent.current === event.eventType) return;
@@ -46,8 +51,8 @@ export function useWebcamProctoring({ onIntegrityEvent, faceDetectionIntervalMs 
       if (lastFaceEvent.current === event.eventType) return;
       lastFaceEvent.current = event.eventType;
     }
-    onIntegrityEvent?.(event);
-  }, [onIntegrityEvent]);
+    onIntegrityEventRef.current?.(event);
+  }, []);
 
   // Init Camera
   useEffect(() => {
