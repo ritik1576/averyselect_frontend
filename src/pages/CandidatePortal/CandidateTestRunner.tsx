@@ -8,6 +8,7 @@ import { publicService } from '../../services/api/public.service';
 import { candidateService } from '../../services/api/candidate.service';
 import { fetchTestPayloadRequest, submitTestRequest } from '../../store/slices/sessionSlice';
 import { getStarterCode, isStaleStarterCode } from '../../utils/starterCode';
+import { useWebcamProctoring, type IntegrityEvent } from '../../hooks/useWebcamProctoring';
 
 const Editor = React.lazy(() => import('@monaco-editor/react'));
 import { ProblemStatement } from '../../components/features/test/ProblemStatement';
@@ -121,7 +122,6 @@ export const CandidateTestRunner: React.FC = () => {
 
   // Network & Camera Edge Case State
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
-  const [cameraStatus, setCameraStatus] = useState<'active' | 'denied' | 'unavailable'>('active');
 
   // Security & Proctoring State
   const [tabSwitchCount, setTabSwitchCount] = useState(0);
@@ -140,9 +140,26 @@ export const CandidateTestRunner: React.FC = () => {
       }).catch((e: any) => console.error('Failed to load assessment info', e));
     }
   }, [token, STORAGE_KEY_TIMER]);
+  
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  
+  const handleIntegrityEvent = async (event: IntegrityEvent) => {
+    try {
+      await candidateService.logEvent(event.eventType, event.metadata || {});
+    } catch (e) {
+      // Ignored: API failure must not affect candidate test session
+    }
+    if (event.eventType === 'CAMERA_DISCONNECTED') {
+      setSecurityWarning('⚠️ Warning: Camera disconnected! Please reconnect your camera.');
+    } else if (event.eventType === 'CAMERA_PERMISSION_DENIED' || event.eventType === 'CAMERA_ERROR') {
+      setTabSwitchCount((prev) => prev + 1);
+      setSecurityWarning('⚠️ Camera access denied! Camera permission is required for webcam proctoring.');
+    }
+  };
+
+  const { mediaStream, cameraStatus, faceStatus, videoRef } = useWebcamProctoring({
+    onIntegrityEvent: handleIntegrityEvent
+  });
 
   const testQuestions = testPayload || [];
   const currentQ: any = testQuestions[currentIdx];
@@ -190,44 +207,6 @@ export const CandidateTestRunner: React.FC = () => {
       setIsFullscreen(true);
     }
   };
-
-  // Initialize Webcam Stream with Error/Denial Catching
-  useEffect(() => {
-    let streamToStop: MediaStream | null = null;
-    navigator.mediaDevices?.getUserMedia({ video: true, audio: false })
-      .then((s) => {
-        streamToStop = s;
-        setMediaStream(s);
-        setCameraStatus('active');
-
-        // Track stream disconnection
-        const track = s.getVideoTracks()[0];
-        if (track) {
-          track.onended = () => {
-            setCameraStatus('unavailable');
-            setSecurityWarning('⚠️ Warning: Camera disconnected! Please reconnect your camera.');
-          };
-        }
-      })
-      .catch((err) => {
-        console.warn('Webcam permission denied or camera unavailable:', err);
-        setCameraStatus('denied');
-        setTabSwitchCount((prev) => prev + 1);
-        setSecurityWarning('⚠️ Camera access denied! Camera permission is required for webcam proctoring.');
-      });
-
-    return () => {
-      streamToStop?.getTracks().forEach((t) => t.stop());
-    };
-  }, []);
-
-  // Attach Stream to Video element when ref and stream are ready
-  useEffect(() => {
-    if (videoRef.current && mediaStream) {
-      videoRef.current.srcObject = mediaStream;
-      videoRef.current.play().catch(console.warn);
-    }
-  }, [mediaStream]);
 
   // Fullscreen & Tab Switch Listeners
   useEffect(() => {
@@ -601,7 +580,12 @@ export const CandidateTestRunner: React.FC = () => {
       {/* Floating Webcam Proctoring Feed */}
       <div className="tr-webcam-preview active">
         {mediaStream && cameraStatus === 'active' ? (
-          <video ref={videoRef} autoPlay playsInline muted />
+          <>
+            <video ref={videoRef} autoPlay playsInline muted />
+            <div style={{ position: 'absolute', bottom: 25, right: 5, background: 'rgba(0,0,0,0.7)', color: 'white', padding: '2px 6px', fontSize: '10px', borderRadius: 4, zIndex: 10 }}>
+              {faceStatus === 'no-face' ? '0 Faces (Warning)' : faceStatus === 'multiple-faces' ? '2+ Faces (Warning)' : faceStatus === 'one-face' ? '1 Face (OK)' : 'Detecting...'}
+            </div>
+          </>
         ) : (
           <div className={`tr-webcam-placeholder ${cameraStatus === 'denied' ? 'denied' : ''}`}>
             <Camera size={22} color={cameraStatus === 'denied' ? '#ef4444' : '#ef4623'} />
