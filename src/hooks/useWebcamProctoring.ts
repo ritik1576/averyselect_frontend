@@ -93,11 +93,11 @@ export function useWebcamProctoring({ onIntegrityEvent, faceDetectionIntervalMs 
 
   // Attach Stream to Video element
   useEffect(() => {
-    if (videoRef.current && mediaStream) {
+    if (videoRef.current && mediaStream && videoRef.current.srcObject !== mediaStream) {
       videoRef.current.srcObject = mediaStream;
       videoRef.current.play().catch(console.warn);
     }
-  }, [mediaStream]);
+  }); // Runs after every render to handle React remounts
 
   // Init Face Detector
   useEffect(() => {
