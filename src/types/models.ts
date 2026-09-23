@@ -39,6 +39,8 @@ export interface Assessment {
   durationSeconds?: number;
   passingScore?: number;
   status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
+  isPublished?: boolean;
+  deletedAt?: string;
   createdAt?: string;
   updatedAt?: string;
 }

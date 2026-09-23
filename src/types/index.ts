@@ -133,6 +133,8 @@ export interface Assessment {
   duration_minutes: number;       // in minutes
   language: AssessmentLanguage;
   status: AssessmentStatus;
+  isPublished?: boolean;
+  deletedAt?: string;
   created_at: string;
   updated_at: string;
 }
@@ -279,6 +281,7 @@ export interface ActivityEvent {
 export interface SessionReport {
   questions: any[];
   activityEvents: ActivityEvent[];
+  assessment_id?: string;
   assessment_title?: string;
   candidate_name?: string;
   candidate_email?: string;

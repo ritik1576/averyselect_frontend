@@ -1146,3 +1146,78 @@
 .cdr-status-item.review {
   color: var(--color-warning);
 }
+
+/* Timeline specific styles */
+.cdr-timeline-overview {
+  margin-top: 24px;
+}
+
+.cdr-activity-timeline-list {
+  display: flex;
+  flex-direction: column;
+  padding: 16px 24px;
+}
+
+.cdr-timeline-item {
+  display: flex;
+  gap: 16px;
+  padding-bottom: 24px;
+  position: relative;
+}
+
+.cdr-timeline-item:last-child {
+  padding-bottom: 0;
+}
+
+.cdr-timeline-item::before {
+  content: '';
+  position: absolute;
+  left: 15px; /* Centers the line with the 32px icon container */
+  top: 32px;
+  bottom: 0;
+  width: 2px;
+  background-color: var(--color-border);
+}
+
+.cdr-timeline-item:last-child::before {
+  display: none;
+}
+
+.cdr-timeline-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  z-index: 1;
+}
+
+.cdr-timeline-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 6px; /* Aligns visually with the center of the icon */
+}
+
+.cdr-timeline-time {
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+  font-weight: var(--font-weight-medium);
+}
+
+.cdr-timeline-label {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+.cdr-timeline-empty {
+  padding: 24px;
+  color: var(--color-text-tertiary);
+  font-style: italic;
+  font-size: var(--text-sm);
+}
