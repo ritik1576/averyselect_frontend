@@ -8,7 +8,8 @@ import {
   X, User, Mail,
   XCircle, CheckCircle2, Copy,
   Play, Pause, Maximize2, Minimize2, RotateCcw,
-  AlertTriangle, Edit2, Check, X as XIcon, ShieldAlert, MonitorOff, CopyX, ChevronDown
+  AlertTriangle, Edit2, Check, X as XIcon, ShieldAlert, MonitorOff, CopyX, ChevronDown,
+  Camera, VideoOff, Users, Clock, Activity
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import './CandidateDetailReport.css';
@@ -563,6 +564,50 @@ export const CandidateDetailReport: React.FC = () => {
 
   const aggregatedViolations = Object.values(groupedViolations);
 
+  // --- Timeline Mapping Functions ---
+  const getTimelineEventLabel = (event: ActivityEvent) => {
+    switch (event.eventType) {
+      case 'CAMERA_STARTED': return 'Camera started.';
+      case 'CAMERA_PERMISSION_DENIED': return 'Camera permission was denied.';
+      case 'CAMERA_ERROR': return 'Camera error occurred.';
+      case 'CAMERA_DISCONNECTED': return 'Camera connection was interrupted.';
+      case 'FACE_NOT_DETECTED': return 'Candidate face was not detected.';
+      case 'FACE_DETECTED': return 'Candidate face was detected.';
+      case 'MULTIPLE_FACES_DETECTED': return 'Multiple faces were detected.';
+      case 'ASSESSMENT_STARTED': return 'Assessment started';
+      case 'QUESTION_OPENED': return 'Question opened';
+      case 'CODE_CHANGED': return 'Code changed';
+      case 'CODE_EXECUTED': return 'Code executed';
+      case 'TAB_SWITCHED': return 'Tab Switched';
+      case 'FULLSCREEN_EXITED': return 'Exited Fullscreen';
+      case 'FULLSCREEN_ENTERED': return 'Entered Fullscreen';
+      case 'COPY_ATTEMPTED': return 'Copy/Paste Attempted';
+      case 'LARGE_PASTE_DETECTED': return 'Large Paste Detected';
+      case 'QUESTION_SUBMITTED': return 'Question submitted';
+      case 'ASSESSMENT_SUBMITTED': return 'Assessment submitted';
+      default: return event.eventType;
+    }
+  };
+
+  const getTimelineEventIcon = (event: ActivityEvent) => {
+    switch (event.eventType) {
+      case 'CAMERA_STARTED':
+      case 'FACE_DETECTED': return <Camera size={16} color="#3b82f6" />;
+      case 'CAMERA_PERMISSION_DENIED':
+      case 'CAMERA_DISCONNECTED':
+      case 'CAMERA_ERROR':
+      case 'FACE_NOT_DETECTED': return <VideoOff size={16} color="#f97316" />;
+      case 'MULTIPLE_FACES_DETECTED': return <Users size={16} color="#f97316" />;
+      case 'TAB_SWITCHED': return <MonitorOff size={16} color="#ef4444" />;
+      case 'FULLSCREEN_EXITED': return <Maximize2 size={16} color="#f97316" />;
+      case 'COPY_ATTEMPTED': 
+      case 'LARGE_PASTE_DETECTED': return <CopyX size={16} color="#ef4444" />;
+      case 'ASSESSMENT_STARTED':
+      case 'ASSESSMENT_SUBMITTED': return <Clock size={16} color="#3b82f6" />;
+      default: return <Activity size={16} color="#64748b" />;
+    }
+  };
+
   return (
     <div className="cdr-container">
       {/* Header */}
@@ -663,6 +708,36 @@ export const CandidateDetailReport: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Activity & Integrity Timeline */}
+      <div className="cdr-security-overview cdr-timeline-overview">
+        <div className="cdr-security-header">
+          <Activity size={18} color="#64748b" />
+          <h2>Activity & Integrity Timeline</h2>
+        </div>
+        
+        {activityEvents.length === 0 ? (
+          <div className="cdr-timeline-empty">
+            No activity events recorded for this session.
+          </div>
+        ) : (
+          <div className="cdr-activity-timeline-list">
+            {activityEvents.map((event, idx) => (
+              <div key={event.id || idx} className="cdr-timeline-item">
+                <div className="cdr-timeline-icon">
+                  {getTimelineEventIcon(event)}
+                </div>
+                <div className="cdr-timeline-content">
+                  <span className="cdr-timeline-time">{formatEventTime(event.createdAt)}</span>
+                  <span className="cdr-timeline-label" data-testid="timeline-item-label">
+                    {getTimelineEventLabel(event)}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* Row-based Layout Content */}
       <div className="cdr-scrollable-content">
